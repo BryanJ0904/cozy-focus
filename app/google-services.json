@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "1087270013102",
-    "project_id": "cozyfocus-e671e",
-    "storage_bucket": "cozyfocus-e671e.appspot.com"
+    "project_number": "430998623275",
+    "project_id": "uts-lec",
+    "storage_bucket": "uts-lec.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1087270013102:android:223d81ec580cd6ef57053f",
+        "mobilesdk_app_id": "1:430998623275:android:798c94807ee98fd5c8866e",
         "android_client_info": {
           "package_name": "com.example.cozyfocus"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAS9Z57cuR70BuLlfWl6yuQV32ETLeT4No"
+          "current_key": "AIzaSyDFWewn65r6VOi76JFVcxrP8pvE6ICkQIM"
         }
       ],
       "services": {
