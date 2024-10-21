@@ -4,7 +4,7 @@ import com.example.cozyfocus.enums.TaskStatus
 import com.google.firebase.Timestamp
 
 data class Task(
-    val id: Int = 0,
+    val id: String = "",
     val title: String = "",
     val date: Timestamp = Timestamp.now(),
     val status: Int = TaskStatus.NOT_STARTED.ordinal
