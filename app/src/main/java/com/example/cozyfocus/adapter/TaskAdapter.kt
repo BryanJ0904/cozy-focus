@@ -5,8 +5,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.cozyfocus.R
+import com.example.cozyfocus.enums.TaskStatus
 import com.example.cozyfocus.model.Task
 import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
@@ -23,7 +25,11 @@ class TaskAdapter(private val tasks: List<Task>) : RecyclerView.Adapter<TaskAdap
             taskCheckbox.isChecked = task.status == 1
             taskDate.text = formatDate(task.date)
             taskTitle.text = task.title
-            taskStatus.text = task.status.toString()
+
+            val taskStatusValue = TaskStatus.fromValue(task.status)
+            taskStatus.text = taskStatusValue.getDisplayName()
+            val statusTextColor = ContextCompat.getColor(taskStatus.context, taskStatusValue.getStatusColor(task.status))
+            taskStatus.setTextColor(statusTextColor)
         }
 
         private fun formatDate(date: Timestamp): String {

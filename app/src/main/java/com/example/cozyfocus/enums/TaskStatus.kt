@@ -7,7 +7,7 @@ enum class TaskStatus(val value: Int) {
     IN_PROGRESS(1),
     DONE(2);
 
-    fun displayName(): String {
+    fun getDisplayName(): String {
         return when (this) {
             NOT_STARTED -> "Not Started"
             IN_PROGRESS -> "In Progress"
