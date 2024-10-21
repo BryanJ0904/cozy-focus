@@ -22,7 +22,7 @@ class TaskAdapter(private val tasks: List<Task>) : RecyclerView.Adapter<TaskAdap
         private val taskStatus: TextView = itemView.findViewById(R.id.taskStatus)
 
         fun bind(task: Task) {
-            taskCheckbox.isChecked = task.status == 1
+            taskCheckbox.isChecked = task.status == TaskStatus.DONE.ordinal
             taskDate.text = formatDate(task.date)
             taskTitle.text = task.title
 
