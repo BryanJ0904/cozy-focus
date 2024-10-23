@@ -5,5 +5,8 @@
     <color name="yellow">#FFFFFF00</color>
     <color name="icon_color">#73BBBF</color>
     <color name="top_color">#1C2231</color>
-
+    <color name="button_primary">#73BBBF</color>
+    <color name="warning">#F59E0B</color>
+    <color name="info">#6B7280</color>
+    <color name="success">#4CAF50</color>
 </resources>
