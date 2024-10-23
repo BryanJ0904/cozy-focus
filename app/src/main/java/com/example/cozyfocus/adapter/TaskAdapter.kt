@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -14,14 +15,21 @@ import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class TaskAdapter(private val tasks: List<Task>) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
+class TaskAdapter(
+    private val tasks: List<Task>,
+    private val onEditClick: (Task) -> Unit,
+    private val onDeleteClick: (Task) -> Unit
+) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
+
     class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val taskCheckbox: CheckBox = itemView.findViewById(R.id.taskDone)
         private val taskDate: TextView = itemView.findViewById(R.id.taskDate)
         private val taskTitle: TextView = itemView.findViewById(R.id.taskTitle)
         private val taskStatus: TextView = itemView.findViewById(R.id.taskStatus)
+        private val editTask: ImageView = itemView.findViewById(R.id.editTask)
+        private val deleteTask: ImageView = itemView.findViewById(R.id.startTask)
 
-        fun bind(task: Task) {
+        fun bind(task: Task, onEditClick: (Task) -> Unit, onDeleteClick: (Task) -> Unit) {
             taskCheckbox.isChecked = task.status == TaskStatus.DONE.ordinal
             taskDate.text = formatDate(task.date)
             taskTitle.text = task.title
@@ -30,6 +38,10 @@ class TaskAdapter(private val tasks: List<Task>) : RecyclerView.Adapter<TaskAdap
             taskStatus.text = taskStatusValue.getDisplayName()
             val statusTextColor = ContextCompat.getColor(taskStatus.context, taskStatusValue.getStatusColor(task.status))
             taskStatus.setTextColor(statusTextColor)
+
+
+            editTask.setOnClickListener { onEditClick(task) }
+            deleteTask.setOnClickListener { onDeleteClick(task) }
         }
 
         private fun formatDate(date: Timestamp): String {
@@ -44,7 +56,7 @@ class TaskAdapter(private val tasks: List<Task>) : RecyclerView.Adapter<TaskAdap
     }
 
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
-        holder.bind(tasks[position])
+        holder.bind(tasks[position], onEditClick, onDeleteClick)
     }
 
     override fun getItemCount(): Int = tasks.size

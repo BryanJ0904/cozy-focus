@@ -25,7 +25,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-class SecondFragment:Fragment(R.layout.fragment_second) {
+class SecondFragment : Fragment(R.layout.fragment_second) {
     private lateinit var taskRecyclerView: RecyclerView
     private lateinit var taskAdapter: TaskAdapter
     private val db = FirebaseFirestore.getInstance()
@@ -60,7 +60,7 @@ class SecondFragment:Fragment(R.layout.fragment_second) {
                     taskList.add(task)
                 }
 
-                taskAdapter = TaskAdapter(taskList)
+                taskAdapter = TaskAdapter(taskList, ::showEditTaskDialog, ::deleteTask)
                 taskRecyclerView.adapter = taskAdapter
             }
             .addOnFailureListener { exception ->
@@ -132,31 +132,109 @@ class SecondFragment:Fragment(R.layout.fragment_second) {
         builder.create().show()
     }
 
+    private fun showEditTaskDialog(task: Task) {
+        val builder = AlertDialog.Builder(requireContext())
+        val inflater = layoutInflater
+        val dialogView = inflater.inflate(R.layout.add_task_form, null)
+
+        val taskTitleEditText = dialogView.findViewById<EditText>(R.id.newTaskTitle)
+        val taskDateTextView = dialogView.findViewById<TextView>(R.id.newTaskDate)
+        val taskStatusSpinner = dialogView.findViewById<Spinner>(R.id.newTaskStatus)
+
+        var selectedDateTime = Calendar.getInstance().apply {
+            time = task.date.toDate()
+        }
+
+        // Set existing task data
+        taskTitleEditText.setText(task.title)
+        val dateFormat = SimpleDateFormat("EEE, d MMM yyyy hh:mm a", Locale.getDefault())
+        taskDateTextView.text = dateFormat.format(selectedDateTime.time)
+
+        taskDateTextView.setOnClickListener {
+            val currentDate = Calendar.getInstance()
+            val year = currentDate.get(Calendar.YEAR)
+            val month = currentDate.get(Calendar.MONTH)
+            val day = currentDate.get(Calendar.DAY_OF_MONTH)
+
+            val datePickerDialog = DatePickerDialog(
+                requireContext(),
+                { _, selectedYear, selectedMonth, selectedDay ->
+                    selectedDateTime.set(Calendar.YEAR, selectedYear)
+                    selectedDateTime.set(Calendar.MONTH, selectedMonth)
+                    selectedDateTime.set(Calendar.DAY_OF_MONTH, selectedDay)
+                    showTimePickerDialog(taskDateTextView, selectedDateTime)
+                },
+                year, month, day
+            )
+            datePickerDialog.show()
+        }
+
+        val taskStatusAdapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_spinner_item,
+            TaskStatus.values().map { it.getDisplayName() }
+        )
+        taskStatusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        taskStatusSpinner.adapter = taskStatusAdapter
+
+        // Set existing task status
+        taskStatusSpinner.setSelection(task.status)
+
+        // Add Update and Delete options
+        builder.setView(dialogView)
+            .setTitle("Edit Task")
+            .setPositiveButton("Update") { dialog, _ ->
+                val updatedTaskTitle = taskTitleEditText.text.toString()
+                val updatedTaskStatus = TaskStatus.values()[taskStatusSpinner.selectedItemPosition]
+
+                val updatedTask = task.copy(
+                    title = updatedTaskTitle,
+                    date = Timestamp(selectedDateTime.time),
+                    status = updatedTaskStatus.ordinal
+                )
+
+                editTask(updatedTask)
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setNeutralButton("Delete") { dialog, _ ->
+                deleteTask(task)
+                dialog.dismiss()
+            }
+
+        builder.create().show()
+    }
+
     private fun showTimePickerDialog(taskDateTextView: TextView, selectedDateTime: Calendar) {
-        val currentTime = Calendar.getInstance()
-        val hour = currentTime.get(Calendar.HOUR_OF_DAY)
-        val minute = currentTime.get(Calendar.MINUTE)
+        val hour = selectedDateTime.get(Calendar.HOUR_OF_DAY)
+        val minute = selectedDateTime.get(Calendar.MINUTE)
 
         val timePickerDialog = TimePickerDialog(
             requireContext(),
             { _, selectedHour, selectedMinute ->
                 selectedDateTime.set(Calendar.HOUR_OF_DAY, selectedHour)
                 selectedDateTime.set(Calendar.MINUTE, selectedMinute)
-
                 val dateFormat = SimpleDateFormat("EEE, d MMM yyyy hh:mm a", Locale.getDefault())
                 taskDateTextView.text = dateFormat.format(selectedDateTime.time)
             },
-            hour, minute, false
+            hour,
+            minute,
+            false
         )
         timePickerDialog.show()
     }
 
+    private fun generateId(): String {
+        return db.collection("tasks").document().id
+    }
+
     private fun addTask(task: Task) {
-        db.collection("tasks")
-            .document(task.id)
+        db.collection("tasks").document(task.id)
             .set(task)
             .addOnSuccessListener {
-                fetchTasks()
+                fetchTasks() // Refresh the task list
             }
             .addOnFailureListener { e ->
                 Log.w("SecondFragment", "Error adding task", e)
@@ -164,25 +242,24 @@ class SecondFragment:Fragment(R.layout.fragment_second) {
     }
 
     private fun editTask(task: Task) {
-        // TODO: Add UI and logic to edit task
+        db.collection("tasks").document(task.id)
+            .set(task)
+            .addOnSuccessListener {
+                fetchTasks() // Refresh the task list
+            }
+            .addOnFailureListener { e ->
+                Log.w("SecondFragment", "Error updating task", e)
+            }
     }
 
     private fun deleteTask(task: Task) {
-        db.collection("tasks")
-            .document(task.id)
+        db.collection("tasks").document(task.id)
             .delete()
             .addOnSuccessListener {
-                fetchTasks()
+                fetchTasks() // Refresh the task list
             }
             .addOnFailureListener { e ->
                 Log.w("SecondFragment", "Error deleting task", e)
             }
     }
-
-    private fun generateId(length: Int = 10): String {
-        return (1..length)
-            .map { "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".random() }
-            .joinToString("")
-    }
 }
-
