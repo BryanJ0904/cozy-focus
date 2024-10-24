@@ -27,7 +27,7 @@ class TaskAdapter(
         private val taskTitle: TextView = itemView.findViewById(R.id.taskTitle)
         private val taskStatus: TextView = itemView.findViewById(R.id.taskStatus)
         private val editTask: ImageView = itemView.findViewById(R.id.editTask)
-        private val deleteTask: ImageView = itemView.findViewById(R.id.startTask)
+        private val startTask: ImageView = itemView.findViewById(R.id.startTask)
 
         fun bind(task: Task, onEditClick: (Task) -> Unit, onDeleteClick: (Task) -> Unit) {
             taskCheckbox.isChecked = task.status == TaskStatus.DONE.ordinal
@@ -41,7 +41,7 @@ class TaskAdapter(
 
 
             editTask.setOnClickListener { onEditClick(task) }
-            deleteTask.setOnClickListener { onDeleteClick(task) }
+            startTask.setOnClickListener(null)
         }
 
         private fun formatDate(date: Timestamp): String {
@@ -49,6 +49,7 @@ class TaskAdapter(
             return dateFormatter.format(date.toDate())
         }
     }
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.task_card, parent, false)

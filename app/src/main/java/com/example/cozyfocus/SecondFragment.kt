@@ -145,7 +145,6 @@ class SecondFragment : Fragment(R.layout.fragment_second) {
             time = task.date.toDate()
         }
 
-        // Set existing task data
         taskTitleEditText.setText(task.title)
         val dateFormat = SimpleDateFormat("EEE, d MMM yyyy hh:mm a", Locale.getDefault())
         taskDateTextView.text = dateFormat.format(selectedDateTime.time)
@@ -177,10 +176,10 @@ class SecondFragment : Fragment(R.layout.fragment_second) {
         taskStatusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         taskStatusSpinner.adapter = taskStatusAdapter
 
-        // Set existing task status
+
         taskStatusSpinner.setSelection(task.status)
 
-        // Add Update and Delete options
+        // Update and Delete options
         builder.setView(dialogView)
             .setTitle("Edit Task")
             .setPositiveButton("Update") { dialog, _ ->
