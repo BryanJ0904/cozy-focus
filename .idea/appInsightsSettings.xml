@@ -9,9 +9,9 @@
               <option name="connection">
                 <ConnectionSetting>
                   <option name="appId" value="com.example.cozyfocus" />
-                  <option name="mobileSdkAppId" value="1:1087270013102:android:223d81ec580cd6ef57053f" />
-                  <option name="projectId" value="cozyfocus-e671e" />
-                  <option name="projectNumber" value="1087270013102" />
+                  <option name="mobileSdkAppId" value="1:430998623275:android:798c94807ee98fd5c8866e" />
+                  <option name="projectId" value="uts-lec" />
+                  <option name="projectNumber" value="430998623275" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

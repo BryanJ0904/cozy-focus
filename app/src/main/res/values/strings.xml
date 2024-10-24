@@ -1,5 +1,15 @@
 <resources>
     <string name="app_name">CozyFocus</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!-- TODO: Remove or change this placeholder text -->
+
+    <string name="guest">Sign in to enjoy full access</string>
+    <string name="login">Login</string>
+    <string name="email_input_message">Enter Email</string>
+    <string name="password_input_message">Enter Password</string>
+    <string name="register">Register</string>
+    <string name="regist_button">Register</string>
+    <string name="login_button">Login</string>
+    <string name="logout_button">Log Out</string>
+    <string name="submit_button">SUBMIT</string>
 </resources>

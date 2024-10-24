@@ -50,6 +50,13 @@ class MainActivity : AppCompatActivity() {
                         .commit()
                     true
                 }
+                R.id.profile -> {
+                    val fourthFragment = FourthFragment()
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.flFragment, fourthFragment)
+                        .commit()
+                    true
+                }
                 else -> false
             }
         }
