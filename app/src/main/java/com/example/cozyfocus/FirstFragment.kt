@@ -20,12 +20,13 @@ class FirstFragment : Fragment() {
         startButton = view.findViewById(R.id.button)
 
         startButton?.setOnClickListener {
-            val homeFragment = homeFragment()
+            val newStudyFragment = StudyFragment()
             val transaction = requireActivity().supportFragmentManager.beginTransaction()
-            transaction.replace(R.id.fragment_container, homeFragment)
+            transaction.replace(R.id.flFragment, newStudyFragment, "StudyFragment")
             transaction.addToBackStack(null)
             transaction.commit()
         }
+
 
         return view
     }

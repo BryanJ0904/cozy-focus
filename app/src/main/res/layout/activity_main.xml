@@ -27,7 +27,7 @@
             android:id="@+id/topbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/top_color">
+            android:background="#000000">
 
             <ImageButton
                 android:id="@+id/volume_button"

@@ -4,24 +4,20 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
     app:startDestination="@id/firstFragment">
-
     <fragment
         android:id="@+id/firstFragment"
         android:name="com.example.cozyfocus.FirstFragment"
-        android:label="fragment_first"
-        tools:layout="@layout/fragment_first" >
+        android:label="FirstFragment" >
         <action
-            android:id="@+id/action_firstFragment_to_homeFragment"
-            app:destination="@id/homeFragment" />
+            android:id="@+id/action_firstFragment_to_studyFragment"
+            app:destination="@id/studyFragment" />
     </fragment>
     <fragment
-        android:id="@+id/homeFragment"
-        android:name="com.example.cozyfocus.homeFragment"
-        android:label="fragment_home"
-        tools:layout="@layout/fragment_home" />
-    <activity
-        android:id="@+id/mainActivity"
-        android:name="com.example.cozyfocus.MainActivity"
-        android:label="fragment_fourth"
-        tools:layout="@layout/fragment_fourth" />
+        android:id="@+id/studyFragment"
+        android:name="com.example.cozyfocus.StudyFragment"
+        android:label="StudyFragment" >
+        <action
+            android:id="@+id/action_studyFragment_to_firstFragment"
+            app:destination="@id/firstFragment" />
+    </fragment>
 </navigation>

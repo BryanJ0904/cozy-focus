@@ -14,8 +14,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        // Menambahkan FirstFragment ke dalam fragment container
         if (savedInstanceState == null) {
             val firstFragment = FirstFragment()
             supportFragmentManager.beginTransaction()
