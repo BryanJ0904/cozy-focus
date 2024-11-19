@@ -8,12 +8,13 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
     private lateinit var mediaPlayer: MediaPlayer
-    private lateinit var playPauseButton: ImageButton
     private var isPlaying = true
+    private lateinit var volumeButton: ImageButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
         if (savedInstanceState == null) {
             val firstFragment = FirstFragment()
             supportFragmentManager.beginTransaction()
@@ -23,12 +24,11 @@ class MainActivity : AppCompatActivity() {
 
         mediaPlayer = MediaPlayer.create(this, R.raw.music)
         mediaPlayer.isLooping = true
-
-        playPauseButton = findViewById(R.id.volume_button)
         mediaPlayer.start()
-        updateButtonIcon()
-        playPauseButton.setOnClickListener {
-            toggleMusic()
+
+        volumeButton = findViewById(R.id.volume_button)
+        volumeButton.setOnClickListener {
+            toggleVolume()
         }
 
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
@@ -39,6 +39,11 @@ class MainActivity : AppCompatActivity() {
                     supportFragmentManager.beginTransaction()
                         .replace(R.id.flFragment, firstFragment)
                         .commit()
+                    if (!isPlaying) {
+                        mediaPlayer.start()
+                        isPlaying = true
+                    }
+
                     true
                 }
                 R.id.task -> {
@@ -46,6 +51,7 @@ class MainActivity : AppCompatActivity() {
                     supportFragmentManager.beginTransaction()
                         .replace(R.id.flFragment, secondFragment)
                         .commit()
+                    stopMusic()
                     true
                 }
                 R.id.profile -> {
@@ -53,6 +59,7 @@ class MainActivity : AppCompatActivity() {
                     supportFragmentManager.beginTransaction()
                         .replace(R.id.flFragment, fourthFragment)
                         .commit()
+                    stopMusic()
                     true
                 }
                 else -> false
@@ -60,29 +67,30 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun toggleMusic() {
+    fun stopMusic() {
         if (isPlaying) {
             mediaPlayer.pause()
-        } else {
-            mediaPlayer.start()
+            isPlaying = false
         }
-        isPlaying = !isPlaying
-        updateButtonIcon()
     }
 
-    private fun updateButtonIcon() {
-        if (isPlaying) {
-            playPauseButton.setImageResource(R.drawable.music)
+
+    fun toggleVolume() {
+        if (mediaPlayer.isPlaying) {
+            mediaPlayer.setVolume(0f, 0f)
+            mediaPlayer.pause()
+            volumeButton.setImageResource(R.drawable.nomusic)
+            isPlaying = false
         } else {
-            playPauseButton.setImageResource(R.drawable.nomusic)
+            mediaPlayer.setVolume(1f, 1f)
+            mediaPlayer.start()
+            volumeButton.setImageResource(R.drawable.music)
+            isPlaying = true
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        if (::mediaPlayer.isInitialized) {
-            mediaPlayer.stop()
-            mediaPlayer.release()
-        }
+        mediaPlayer.release()
     }
 }
