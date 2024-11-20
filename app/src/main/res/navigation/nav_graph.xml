@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/firstFragment">
+    <fragment
+        android:id="@+id/firstFragment"
+        android:name="com.example.cozyfocus.FirstFragment"
+        android:label="FirstFragment" >
+        <action
+            android:id="@+id/action_firstFragment_to_studyFragment"
+            app:destination="@id/studyFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/studyFragment"
+        android:name="com.example.cozyfocus.StudyFragment"
+        android:label="StudyFragment" >
+        <action
+            android:id="@+id/action_studyFragment_to_firstFragment"
+            app:destination="@id/firstFragment" />
+    </fragment>
+</navigation>

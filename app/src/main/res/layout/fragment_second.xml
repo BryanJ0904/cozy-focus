@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/addTask"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:orientation="horizontal"
+        android:clickable="true"
+        android:focusable="true">
+
+        <ImageView
+            android:id="@+id/addTaskIcon"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/plus_circle"
+            android:layout_gravity="center_vertical"
+            android:contentDescription="Add Task Icon"
+            android:background="@android:color/transparent"
+            android:layout_marginEnd="8dp"/>
+
+        <TextView
+            android:id="@+id/addTaskLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Add Task"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_gravity="center_vertical" />
+    </LinearLayout>
+
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/taskItems"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:scrollbars="vertical" />
+</LinearLayout>
+

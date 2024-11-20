@@ -1,0 +1,19 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Define the shape of the button -->
+    <solid android:color="@color/button_primary" /> <!-- Background color of the button -->
+
+    <!-- Define the border of the button (optional) -->
+    <stroke
+        android:width="2dp"
+        android:color="@color/black" /> <!-- Border width and color -->
+
+    <!-- Make the corners less rounded to create a rectangular shape -->
+    <corners android:radius="4dp" /> <!-- Adjust this value to make the corners more or less rounded -->
+
+    <!-- Optional: Padding inside the button -->
+    <padding
+        android:left="10dp"
+        android:top="10dp"
+        android:right="10dp"
+        android:bottom="10dp" />
+</shape>

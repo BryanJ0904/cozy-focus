@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    tools:context=".GuestFragment">
+
+    <TextView
+        android:id="@+id/title"
+        style="@style/title_text"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:gravity="center"
+        android:layout_marginBottom="20dp"
+        android:text="@string/guest" />
+
+    <Button
+        android:id="@+id/regist_button"
+        style="@style/button"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:background="@drawable/rectangular_button"
+        android:text="@string/regist_button" />
+
+    <Button
+        android:id="@+id/login_button"
+        style="@style/button"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="0dp"
+        android:text="@string/login_button"
+        android:background="@drawable/rectangular_button"/>
+
+</LinearLayout>
