@@ -67,6 +67,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
+
     fun stopMusic() {
         if (isPlaying) {
             mediaPlayer.pause()

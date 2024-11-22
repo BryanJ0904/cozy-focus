@@ -27,9 +27,6 @@ class FirstFragment : Fragment() {
             transaction.addToBackStack(null)
             transaction.commit()
         }
-
-
-
         return view
     }
 }

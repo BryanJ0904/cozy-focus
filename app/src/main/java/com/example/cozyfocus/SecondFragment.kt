@@ -233,12 +233,14 @@ class SecondFragment : Fragment(R.layout.fragment_second) {
         db.collection("tasks").document(task.id)
             .set(task)
             .addOnSuccessListener {
+                Log.d("SecondFragment", "Task successfully added!")
                 fetchTasks() // Refresh the task list
             }
             .addOnFailureListener { e ->
                 Log.w("SecondFragment", "Error adding task", e)
             }
     }
+
 
     private fun editTask(task: Task) {
         db.collection("tasks").document(task.id)

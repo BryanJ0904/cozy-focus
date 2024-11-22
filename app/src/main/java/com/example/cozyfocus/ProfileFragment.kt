@@ -110,7 +110,7 @@ class ProfileFragment : Fragment() {
                 }
         }
 
-            editButton.setOnClickListener {
+        editButton.setOnClickListener {
             if (ContextCompat.checkSelfPermission(
                     requireContext(),
                     Manifest.permission.CAMERA
