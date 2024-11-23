@@ -45,7 +45,7 @@ class GuestFragment : Fragment() {
         registerButton.setOnClickListener {
             val registerFragment = RegisterFragment()
             parentFragmentManager.beginTransaction()
-                .replace(R.id.display, registerFragment)
+                .replace(R.id.flFragment, registerFragment)
                 .addToBackStack(null)
                 .commit()
         }
@@ -53,7 +53,7 @@ class GuestFragment : Fragment() {
         loginButton.setOnClickListener {
             val loginFragment = LoginFragment()
             parentFragmentManager.beginTransaction()
-                .replace(R.id.display, loginFragment)
+                .replace(R.id.flFragment, loginFragment)
                 .addToBackStack(null)
                 .commit()
         }

@@ -128,11 +128,10 @@ class ProfileFragment : Fragment() {
 
         logoutButton.setOnClickListener {
             auth.signOut()
-            val guestFragment = GuestFragment()
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.display, guestFragment)
-                .addToBackStack(null)
-                .commit()
+            val intent = Intent(requireContext(), GuestActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK  // Clear the task stack
+            startActivity(intent)
+            requireActivity().finish()
         }
     }
 

@@ -49,7 +49,7 @@ class LoginFragment : Fragment() {
         registerButton.setOnClickListener {
             val registerFragment = RegisterFragment()
             parentFragmentManager.beginTransaction()
-                .replace(R.id.display, registerFragment)
+                .replace(R.id.flFragment, registerFragment)
                 .addToBackStack(null)
                 .commit()
         }
@@ -71,7 +71,7 @@ class LoginFragment : Fragment() {
                             Log.d("Login", "signInWithEmail:success")
                             val intent = Intent(requireContext(), MainActivity::class.java)
                             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK  // Clear the task stack
-                            startActivity(intent)  // Start MainActivity
+                            startActivity(intent)
                             requireActivity().finish()
                         } else {
                             Log.w("Login", "signInWithEmail:failure", task.exception)
