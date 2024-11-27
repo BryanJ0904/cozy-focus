@@ -43,7 +43,6 @@ class MainActivity : AppCompatActivity() {
                         mediaPlayer.start()
                         isPlaying = true
                     }
-
                     true
                 }
                 R.id.task -> {
@@ -62,12 +61,19 @@ class MainActivity : AppCompatActivity() {
                     stopMusic()
                     true
                 }
+                // Menambahkan navigasi untuk item Activity
+                R.id.activity -> {
+                    val activityFragment = ThirdFragment() // Ganti dengan nama fragment yang sesuai
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.flFragment, activityFragment)
+                        .commit()
+                    stopMusic()
+                    true
+                }
                 else -> false
             }
         }
     }
-
-
 
     fun stopMusic() {
         if (isPlaying) {
@@ -75,7 +81,6 @@ class MainActivity : AppCompatActivity() {
             isPlaying = false
         }
     }
-
 
     fun toggleVolume() {
         if (mediaPlayer.isPlaying) {

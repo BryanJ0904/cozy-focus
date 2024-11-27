@@ -21,6 +21,7 @@ import com.example.cozyfocus.enums.TaskStatus
 import com.example.cozyfocus.model.Task
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.auth.FirebaseAuth
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -40,7 +41,7 @@ class SecondFragment : Fragment(R.layout.fragment_second) {
         taskRecyclerView = view.findViewById(R.id.taskItems)
         taskRecyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        fetchTasks()
+        fetchTasks() // Menampilkan task berdasarkan user
 
         val addTaskButton = view.findViewById<LinearLayout>(R.id.addTask)
         addTaskButton.setOnClickListener {
@@ -50,24 +51,50 @@ class SecondFragment : Fragment(R.layout.fragment_second) {
         return view
     }
 
+    // Fungsi untuk mengambil task berdasarkan userId
     private fun fetchTasks() {
-        db.collection("tasks")
-            .get()
-            .addOnSuccessListener { result ->
-                val taskList = mutableListOf<Task>()
-                for (document in result) {
-                    val task = document.toObject(Task::class.java)
-                    taskList.add(task)
-                }
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId != null) {
+            db.collection("tasks")
+                .document(userId) // Mengakses koleksi berdasarkan userId
+                .collection("user_tasks") // Mengakses sub-koleksi "user_tasks" untuk task
+                .get()
+                .addOnSuccessListener { result ->
+                    val taskList = mutableListOf<Task>()
+                    for (document in result) {
+                        val task = document.toObject(Task::class.java)
+                        taskList.add(task)
+                    }
 
-                taskAdapter = TaskAdapter(taskList, ::showEditTaskDialog, ::deleteTask)
-                taskRecyclerView.adapter = taskAdapter
-            }
-            .addOnFailureListener { exception ->
-                Log.w("SecondFragment", "Error getting tasks: ", exception)
-            }
+                    taskAdapter = TaskAdapter(taskList, ::showEditTaskDialog, ::deleteTask)
+                    taskRecyclerView.adapter = taskAdapter
+                }
+                .addOnFailureListener { exception ->
+                    Log.w("SecondFragment", "Error getting tasks: ", exception)
+                }
+        }
     }
 
+    // Fungsi untuk menambahkan task baru
+    private fun addTask(task: Task) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId != null) {
+            db.collection("tasks")
+                .document(userId) // Menyimpan task di bawah dokumen userId
+                .collection("user_tasks") // Menyimpan task dalam sub-koleksi "user_tasks"
+                .document(task.id)
+                .set(task)
+                .addOnSuccessListener {
+                    Log.d("SecondFragment", "Task successfully added!")
+                    fetchTasks() // Refresh the task list
+                }
+                .addOnFailureListener { e ->
+                    Log.w("SecondFragment", "Error adding task", e)
+                }
+        }
+    }
+
+    // Fungsi untuk menampilkan dialog tambah task
     private fun showAddTaskDialog() {
         val builder = AlertDialog.Builder(requireContext())
         val inflater = layoutInflater
@@ -93,7 +120,6 @@ class SecondFragment : Fragment(R.layout.fragment_second) {
                     selectedDateTime.set(Calendar.DAY_OF_MONTH, selectedDay)
 
                     showTimePickerDialog(taskDateTextView, selectedDateTime)
-
                 },
                 year, month, day
             )
@@ -132,6 +158,7 @@ class SecondFragment : Fragment(R.layout.fragment_second) {
         builder.create().show()
     }
 
+    // Fungsi untuk menampilkan dialog edit task
     private fun showEditTaskDialog(task: Task) {
         val builder = AlertDialog.Builder(requireContext())
         val inflater = layoutInflater
@@ -176,7 +203,6 @@ class SecondFragment : Fragment(R.layout.fragment_second) {
         taskStatusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         taskStatusSpinner.adapter = taskStatusAdapter
 
-
         taskStatusSpinner.setSelection(task.status)
 
         // Update and Delete options
@@ -206,6 +232,48 @@ class SecondFragment : Fragment(R.layout.fragment_second) {
         builder.create().show()
     }
 
+    // Fungsi untuk menyimpan perubahan task
+    private fun editTask(task: Task) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId != null) {
+            db.collection("tasks")
+                .document(userId) // Mengakses koleksi berdasarkan userId
+                .collection("user_tasks") // Mengakses sub-koleksi "user_tasks"
+                .document(task.id)
+                .set(task)
+                .addOnSuccessListener {
+                    fetchTasks() // Refresh the task list
+                }
+                .addOnFailureListener { e ->
+                    Log.w("SecondFragment", "Error updating task", e)
+                }
+        }
+    }
+
+    // Fungsi untuk menghapus task
+    private fun deleteTask(task: Task) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId != null) {
+            db.collection("tasks")
+                .document(userId) // Mengakses koleksi berdasarkan userId
+                .collection("user_tasks") // Mengakses sub-koleksi "user_tasks"
+                .document(task.id)
+                .delete()
+                .addOnSuccessListener {
+                    fetchTasks() // Refresh the task list
+                }
+                .addOnFailureListener { e ->
+                    Log.w("SecondFragment", "Error deleting task", e)
+                }
+        }
+    }
+
+    // Fungsi untuk membuat ID unik
+    private fun generateId(): String {
+        return System.currentTimeMillis().toString()
+    }
+
+    // Fungsi untuk menampilkan TimePickerDialog
     private fun showTimePickerDialog(taskDateTextView: TextView, selectedDateTime: Calendar) {
         val hour = selectedDateTime.get(Calendar.HOUR_OF_DAY)
         val minute = selectedDateTime.get(Calendar.MINUTE)
@@ -215,52 +283,12 @@ class SecondFragment : Fragment(R.layout.fragment_second) {
             { _, selectedHour, selectedMinute ->
                 selectedDateTime.set(Calendar.HOUR_OF_DAY, selectedHour)
                 selectedDateTime.set(Calendar.MINUTE, selectedMinute)
+
                 val dateFormat = SimpleDateFormat("EEE, d MMM yyyy hh:mm a", Locale.getDefault())
                 taskDateTextView.text = dateFormat.format(selectedDateTime.time)
             },
-            hour,
-            minute,
-            false
+            hour, minute, false
         )
         timePickerDialog.show()
-    }
-
-    private fun generateId(): String {
-        return db.collection("tasks").document().id
-    }
-
-    private fun addTask(task: Task) {
-        db.collection("tasks").document(task.id)
-            .set(task)
-            .addOnSuccessListener {
-                Log.d("SecondFragment", "Task successfully added!")
-                fetchTasks() // Refresh the task list
-            }
-            .addOnFailureListener { e ->
-                Log.w("SecondFragment", "Error adding task", e)
-            }
-    }
-
-
-    private fun editTask(task: Task) {
-        db.collection("tasks").document(task.id)
-            .set(task)
-            .addOnSuccessListener {
-                fetchTasks() // Refresh the task list
-            }
-            .addOnFailureListener { e ->
-                Log.w("SecondFragment", "Error updating task", e)
-            }
-    }
-
-    private fun deleteTask(task: Task) {
-        db.collection("tasks").document(task.id)
-            .delete()
-            .addOnSuccessListener {
-                fetchTasks() // Refresh the task list
-            }
-            .addOnFailureListener { e ->
-                Log.w("SecondFragment", "Error deleting task", e)
-            }
     }
 }

@@ -13,6 +13,7 @@
         android:id="@+id/activity"
         android:title="Activity"
         android:icon="@drawable/activity"/>
+
     <item
         android:id="@+id/profile"
         android:title="Profile"

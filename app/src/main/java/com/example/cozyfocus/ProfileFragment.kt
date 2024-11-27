@@ -30,20 +30,9 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.SetOptions
 import java.io.ByteArrayOutputStream
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [ProfileFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class ProfileFragment : Fragment() {
     private val CAMERA_REQUEST_CODE = 100
     private lateinit var profilePicture: ImageView
@@ -60,7 +49,6 @@ class ProfileFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_profile, container, false)
     }
 
@@ -72,45 +60,29 @@ class ProfileFragment : Fragment() {
 
         val userId = auth.currentUser?.uid
         if (userId != null) {
+            // Fetch User data
             db.collection("Users").document(userId).get().addOnSuccessListener { document ->
                 if (document != null) {
-                    profileTitle.setText("Hello " + document.getString("nama"))
-                }
-            }
-
-            db.collection("Users").document(userId)
-                .get()
-                .addOnSuccessListener { documentSnapshot ->
-                    if (documentSnapshot.exists()) {
-                        val encodedPhoto = documentSnapshot.getString("photo")
-
-                        if (encodedPhoto != null) {
-                            // Decode the Base64 string back to a Bitmap
-                            val decodedString = Base64.decode(encodedPhoto, Base64.DEFAULT)
-                            val bitmap =
-                                BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
-
-                            // Set the bitmap to the ImageView
-                            profilePicture.setImageBitmap(bitmap)
-                        }
+                    profileTitle.text = "Hello " + document.getString("nama")
+                    // Load profile picture if exists
+                    val encodedPhoto = document.getString("photo")
+                    if (encodedPhoto != null) {
+                        val decodedString = Base64.decode(encodedPhoto, Base64.DEFAULT)
+                        val bitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
+                        profilePicture.setImageBitmap(bitmap)
                     } else {
-                        Toast.makeText(
-                            requireContext(),
-                            "Foto profil tidak ditemukan!",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Toast.makeText(requireContext(), "Foto profil tidak ditemukan!", Toast.LENGTH_SHORT).show()
                     }
                 }
-                .addOnFailureListener { exception ->
-                    Toast.makeText(
-                        requireContext(),
-                        "Gagal mendapatkan foto profil!",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+            }.addOnFailureListener { exception ->
+                Toast.makeText(requireContext(), "Gagal mendapatkan data pengguna!", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show()
         }
 
         editButton.setOnClickListener {
+            // Handle Camera Permission and open camera
             if (ContextCompat.checkSelfPermission(
                     requireContext(),
                     Manifest.permission.CAMERA
@@ -129,7 +101,7 @@ class ProfileFragment : Fragment() {
         logoutButton.setOnClickListener {
             auth.signOut()
             val intent = Intent(requireContext(), GuestActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK  // Clear the task stack
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
             requireActivity().finish()
         }
@@ -150,45 +122,31 @@ class ProfileFragment : Fragment() {
 
     private fun saveProfilePicture(photo: Bitmap) {
         val userId = auth.currentUser?.uid
-
         if (userId != null) {
-            val photo = getCircularBitmap(photo)
-            profilePicture.setImageBitmap(photo)
+            // Convert the photo to a circular image
+            val circularPhoto = getCircularBitmap(photo)
+            profilePicture.setImageBitmap(circularPhoto)
 
-            // Convert the photo to a Base64 encoded string
+            // Convert the photo to a Base64 string
             val byteArrayOutputStream = ByteArrayOutputStream()
-            photo.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
+            circularPhoto.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
             val byteArray = byteArrayOutputStream.toByteArray()
             val encodedPhoto = Base64.encodeToString(byteArray, Base64.DEFAULT)
 
-            // Create a map for the profile photo
-            val profilePhoto = hashMapOf(
-                "photo" to encodedPhoto
-            )
+            // Create a map to store the photo in Firestore
+            val profilePhoto = hashMapOf("photo" to encodedPhoto)
 
-            // Instead of adding to a collection, set it directly in the user's document
+            // Update user's profile photo in Firestore
             db.collection("Users").document(userId)
-                .set(profilePhoto, SetOptions.merge())  // Merge with existing fields, if any
+                .set(profilePhoto, SetOptions.merge()) // Merge to retain other fields
                 .addOnSuccessListener {
-                    Toast.makeText(
-                        requireContext(),
-                        "Foto profil berhasil diperbaharui!",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Toast.makeText(requireContext(), "Foto profil berhasil diperbaharui!", Toast.LENGTH_SHORT).show()
                 }
                 .addOnFailureListener {
-                    Toast.makeText(
-                        requireContext(),
-                        "Foto profil gagal diperbaharui!",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Toast.makeText(requireContext(), "Foto profil gagal diperbaharui!", Toast.LENGTH_SHORT).show()
                 }
         } else {
-            Toast.makeText(
-                requireContext(),
-                "Gagal mendapatkan User ID",
-                Toast.LENGTH_SHORT
-            ).show()
+            Toast.makeText(requireContext(), "Gagal mendapatkan User ID", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -208,7 +166,6 @@ class ProfileFragment : Fragment() {
         val rect = Rect(0, 0, minEdge, minEdge)
         val rectF = RectF(rect)
 
-        // Draw a circle
         canvas.drawARGB(0, 0, 0, 0)
         paint.color = Color.BLACK
         canvas.drawCircle(rectF.centerX(), rectF.centerY(), radius.toFloat(), paint)
@@ -219,5 +176,4 @@ class ProfileFragment : Fragment() {
 
         return output
     }
-
 }
