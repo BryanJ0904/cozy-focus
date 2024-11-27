@@ -14,20 +14,16 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.tabs.TabLayout
 
 class StudyFragment : Fragment() {
-
     private lateinit var tabLayout: TabLayout
     private lateinit var tvTimer: TextView
     private lateinit var btnStart: Button
     private lateinit var btnReset: ImageButton
     private lateinit var backgroundImageView: ImageView
     private lateinit var arrowButton: ImageButton
+    private lateinit var lockIcon: ImageView  // Tambahkan ImageView untuk lock
     private lateinit var bgNameTextView: TextView
-    private var timer: CountDownTimer? = null
-    private var mediaPlayer: MediaPlayer? = null
-    private var initialTimerDuration = 5 * 1000L
-    private var currentTimerDuration = initialTimerDuration
-    private var currentTabIndex = 0
     private var currentBackgroundIndex = 0
+    private var mediaPlayer: MediaPlayer? = null  // Deklarasi mediaPlayer
 
     private val backgrounds = listOf(
         Pair("Rain", Pair(R.drawable.bg, R.raw.rain)),
@@ -37,37 +33,43 @@ class StudyFragment : Fragment() {
         Pair("Sky", Pair(R.drawable.sky, R.raw.sky))
     )
 
+    private var currentTabIndex = 0
+    private var timer: CountDownTimer? = null
+
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_study, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        backgroundImageView = view.findViewById(R.id.backgroundImageView)
+        lockIcon = view.findViewById(R.id.lockIcon)  // Menghubungkan lockIcon
+        bgNameTextView = view.findViewById(R.id.bg_name)
+        arrowButton = view.findViewById(R.id.arrow_button)
         tabLayout = view.findViewById(R.id.tabLayout)
         tvTimer = view.findViewById(R.id.tvTimer)
         btnStart = view.findViewById(R.id.btnStart)
         btnReset = view.findViewById(R.id.btnReset)
-        backgroundImageView = view.findViewById(R.id.backgroundImageView)
-        arrowButton = view.findViewById(R.id.arrow_button)
-        bgNameTextView = view.findViewById(R.id.bg_name)
 
+        // Button untuk mengganti background
         arrowButton.setOnClickListener {
             currentBackgroundIndex = (currentBackgroundIndex + 1) % backgrounds.size
             updateBackground()
         }
 
-        tabLayout.addTab(tabLayout.newTab().setText("Focus"))
-        tabLayout.addTab(tabLayout.newTab().setText("Break"))
-        tabLayout.addTab(tabLayout.newTab().setText("Rest"))
+        // Update background dan musik saat awal
+        updateBackground()
 
+        // Tab selected listener
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
+                // Jangan ubah background ketika tab dipilih, hanya timer yang diubah
+                currentTabIndex = tab?.position ?: 0
+                updateTimerDuration(currentTabIndex)
                 stopTimer()
                 resetTimer()
-                updateTimerDuration(tab?.position ?: 0)
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab?) {}
@@ -76,7 +78,7 @@ class StudyFragment : Fragment() {
 
         btnStart.setOnClickListener {
             if (btnStart.text == "Start") {
-                startTimer(currentTimerDuration)
+                startTimer()
             } else {
                 stopTimer()
             }
@@ -85,9 +87,6 @@ class StudyFragment : Fragment() {
         btnReset.setOnClickListener {
             resetTimer()
         }
-
-        updateBackground()
-        updateTimerDuration(0)
     }
 
     private fun updateBackground() {
@@ -96,10 +95,19 @@ class StudyFragment : Fragment() {
         backgroundImageView.setImageResource(bgResId)
         playMusic(songResId)
 
+        // Set nama latar belakang
         bgNameTextView.text = name
+
+        // Tampilkan ikon kunci untuk latar belakang tertentu
+        if (name == "Sea" || name == "Cafe" || name == "Sky") {
+            lockIcon.visibility = View.VISIBLE  // Menampilkan ikon kunci
+        } else {
+            lockIcon.visibility = View.GONE  // Menyembunyikan ikon kunci
+        }
     }
 
     private fun playMusic(songResId: Int) {
+        // Stop dan release media player jika ada yang sedang bermain
         mediaPlayer?.stop()
         mediaPlayer?.release()
         mediaPlayer = MediaPlayer.create(context, songResId)
@@ -107,45 +115,29 @@ class StudyFragment : Fragment() {
         mediaPlayer?.start()
     }
 
-    private fun stopMusic() {
-        mediaPlayer?.stop()
-        mediaPlayer?.release()
-        mediaPlayer = null
-    }
-
-    private fun updateTimerDuration(tabIndex: Int) {
-        currentTabIndex = tabIndex
-        currentTimerDuration = 5 * 1000L
-    }
-
-    private fun startTimer(duration: Long) {
+    private fun startTimer() {
+        val duration = 5 * 1000L // Durasi timer, misalnya 5 detik
         timer?.cancel()
-        btnStart.text = "Stop"
-
         timer = object : CountDownTimer(duration, 1000) {
             override fun onTick(millisUntilFinished: Long) {
-                currentTimerDuration = millisUntilFinished
                 updateTimerText(millisUntilFinished)
             }
 
             override fun onFinish() {
-                btnStart.text = "Start"
-                updateTimerText(0)
-                moveToNextTab()
+                resetTimer()
             }
         }.start()
+        btnStart.text = "Stop"
     }
 
     private fun stopTimer() {
         timer?.cancel()
         btnStart.text = "Start"
-        updateTimerText(currentTimerDuration)
     }
 
     private fun resetTimer() {
         stopTimer()
-        currentTimerDuration = 5 * 1000L
-        updateTimerText(currentTimerDuration)
+        tvTimer.text = "00:05"  // Reset timer display to default
     }
 
     private fun updateTimerText(millisUntilFinished: Long) {
@@ -154,25 +146,18 @@ class StudyFragment : Fragment() {
         tvTimer.text = String.format("%02d:%02d", minutes, seconds)
     }
 
-    private fun moveToNextTab() {
-        currentTabIndex = when (currentTabIndex) {
-            0 -> 1
-            1 -> 0
-            2 -> 1
-            else -> 0
+    private fun updateTimerDuration(tabIndex: Int) {
+        // Update the timer duration based on the selected tab index (Focus, Break, etc.)
+        when (tabIndex) {
+            0 -> { /* Set duration for Focus tab */}
+            1 -> { /* Set duration for Break tab */}
+            2 -> { /* Set duration for Rest tab */}
         }
-
-        val selectedTab = tabLayout.getTabAt(currentTabIndex)
-        selectedTab?.select()
-
-        updateTimerDuration(currentTabIndex)
-        resetTimer()
-        startTimer(currentTimerDuration)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        timer?.cancel()
+        // Pastikan untuk melepaskan media player saat fragment dihancurkan
         mediaPlayer?.stop()
         mediaPlayer?.release()
         mediaPlayer = null
