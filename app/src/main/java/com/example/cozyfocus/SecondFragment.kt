@@ -31,6 +31,12 @@ class SecondFragment : Fragment(R.layout.fragment_second) {
     private lateinit var taskAdapter: TaskAdapter
     private val db = FirebaseFirestore.getInstance()
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        Log.d("SecondFragment", "onCreate() called")
+        setRetainInstance(true)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

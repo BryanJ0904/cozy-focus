@@ -53,6 +53,14 @@ class MainActivity : AppCompatActivity() {
                     stopMusic()
                     true
                 }
+                R.id.activity -> {
+                    val thirdFragment = ThirdFragment()
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.flFragment, thirdFragment)
+                        .commit()
+                    stopMusic()
+                    true
+                }
                 R.id.profile -> {
                     val fourthFragment = FourthFragment()
                     supportFragmentManager.beginTransaction()
