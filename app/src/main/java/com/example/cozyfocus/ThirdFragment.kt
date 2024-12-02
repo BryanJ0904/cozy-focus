@@ -1,26 +1,7 @@
 package com.example.cozyfocus
 
 import android.os.Bundle
-<<<<<<< Updated upstream
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import com.example.cozyfocus.R
-
-class ThirdFragment : Fragment(R.layout.fragment_third) {
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_third, container, false)
-    }
-
-
-
-=======
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,11 +9,12 @@ import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
-import androidx.fragment.app.Fragment
+import com.example.cozyfocus.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
-class ThirdFragment:Fragment(R.layout.fragment_third) {
+class ThirdFragment : Fragment(R.layout.fragment_third) {
+
     private lateinit var tvLevel: TextView
     private lateinit var tvTasks: TextView
     private lateinit var progressBar: ProgressBar
@@ -42,16 +24,22 @@ class ThirdFragment:Fragment(R.layout.fragment_third) {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_third, container, false)
+
+        // Initialize views
         tvLevel = view.findViewById(R.id.tv_level)
         tvTasks = view.findViewById(R.id.tv_tasks)
         progressBar = view.findViewById(R.id.progress_circle)
         tvInstruction = view.findViewById(R.id.tv_instruction)
-        fetchLevelData()
+
+        // Fetch user level data from Firebase
+        fetchLevelData(view)
+
         return view
     }
 
-    private fun fetchLevelData() {
+    private fun fetchLevelData(view: View) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val userRef = FirebaseFirestore.getInstance().collection("Users").document(userId)
 
@@ -61,14 +49,13 @@ class ThirdFragment:Fragment(R.layout.fragment_third) {
                 var tasksCompleted = document.getLong("tasksCompleted")?.toInt() ?: 0
                 var tasksRequired = document.getLong("tasksRequired")?.toInt() ?: 5
 
-                val incrementButton = view?.findViewById<Button>(R.id.btn_increment_task)
+                val incrementButton = view.findViewById<Button>(R.id.btn_increment_task)
                 incrementButton?.setOnClickListener {
                     if (tasksCompleted < tasksRequired) {
                         val updatedTasksCompleted = tasksCompleted + 1
 
                         userRef.update("tasksCompleted", updatedTasksCompleted)
                             .addOnSuccessListener {
-                                // Update local variable and UI after success
                                 tasksCompleted = updatedTasksCompleted
                                 updateUI(level, tasksCompleted, tasksRequired)
                             }
@@ -106,8 +93,7 @@ class ThirdFragment:Fragment(R.layout.fragment_third) {
             "tasksCompleted" to 0,
             "tasksRequired" to (currentLevel + 1) * 5 // Increment tasks required
         )).addOnSuccessListener {
-            fetchLevelData() // Refresh the UI
+            fetchLevelData(requireView()) // Use requireView() to safely access the view
         }
     }
->>>>>>> Stashed changes
 }
