@@ -76,7 +76,8 @@ class ThirdFragment : Fragment(R.layout.fragment_third) {
         tvLevel.text = "Level $level"
         tvTasks.text = "$tasksCompleted/$tasksRequired"
         progressBar.max = tasksRequired
-        progressBar.progress = tasksCompleted
+        progressBar.progress = tasksCompleted;
+        //progressBar.progress = tasksCompleted
         tvInstruction.text = "Finish $tasksRequired tasks to level up."
 
         if (tasksCompleted >= tasksRequired) {
