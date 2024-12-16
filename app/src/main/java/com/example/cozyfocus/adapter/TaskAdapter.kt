@@ -18,7 +18,8 @@ import java.util.Locale
 class TaskAdapter(
     private val tasks: List<Task>,
     private val onEditClick: (Task) -> Unit,
-    private val onDeleteClick: (Task) -> Unit
+    private val onDeleteClick: (Task) -> Unit,
+    private val onStartTask: (Task) -> Unit
 ) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
 
     class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
