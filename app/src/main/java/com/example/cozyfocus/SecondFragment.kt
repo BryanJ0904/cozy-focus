@@ -18,10 +18,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.cozyfocus.adapter.TaskAdapter
 import com.example.cozyfocus.enums.TaskStatus
+import com.example.cozyfocus.model.Progress
 import com.example.cozyfocus.model.Task
 import com.google.firebase.Timestamp
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -33,7 +34,6 @@ class SecondFragment : Fragment(R.layout.fragment_second) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d("SecondFragment", "onCreate() called")
         setRetainInstance(true)
     }
 
@@ -57,6 +57,11 @@ class SecondFragment : Fragment(R.layout.fragment_second) {
         return view
     }
 
+    // Fungsi untuk membuat ID unik
+    private fun generateId(): String {
+        return System.currentTimeMillis().toString()
+    }
+
     // Fungsi untuk mengambil task berdasarkan userId
     private fun fetchTasks() {
         val userId = FirebaseAuth.getInstance().currentUser?.uid
@@ -72,30 +77,16 @@ class SecondFragment : Fragment(R.layout.fragment_second) {
                         taskList.add(task)
                     }
 
-                    taskAdapter = TaskAdapter(taskList, ::showEditTaskDialog, ::deleteTask)
+                    taskAdapter = TaskAdapter(
+                        taskList,
+                        ::showEditTaskDialog,
+                        ::deleteTask,
+                        ::startTask
+                    )
                     taskRecyclerView.adapter = taskAdapter
                 }
                 .addOnFailureListener { exception ->
                     Log.w("SecondFragment", "Error getting tasks: ", exception)
-                }
-        }
-    }
-
-    // Fungsi untuk menambahkan task baru
-    private fun addTask(task: Task) {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid
-        if (userId != null) {
-            db.collection("tasks")
-                .document(userId) // Menyimpan task di bawah dokumen userId
-                .collection("user_tasks") // Menyimpan task dalam sub-koleksi "user_tasks"
-                .document(task.id)
-                .set(task)
-                .addOnSuccessListener {
-                    Log.d("SecondFragment", "Task successfully added!")
-                    fetchTasks() // Refresh the task list
-                }
-                .addOnFailureListener { e ->
-                    Log.w("SecondFragment", "Error adding task", e)
                 }
         }
     }
@@ -162,6 +153,25 @@ class SecondFragment : Fragment(R.layout.fragment_second) {
             }
 
         builder.create().show()
+    }
+
+    // Fungsi untuk menambahkan task baru
+    private fun addTask(task: Task) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId != null) {
+            db.collection("tasks")
+                .document(userId) // Menyimpan task di bawah dokumen userId
+                .collection("user_tasks") // Menyimpan task dalam sub-koleksi "user_tasks"
+                .document(task.id)
+                .set(task)
+                .addOnSuccessListener {
+                    Log.d("SecondFragment", "Task successfully added!")
+                    fetchTasks() // Refresh the task list
+                }
+                .addOnFailureListener { e ->
+                    Log.w("SecondFragment", "Error adding task", e)
+                }
+        }
     }
 
     // Fungsi untuk menampilkan dialog edit task
@@ -238,6 +248,25 @@ class SecondFragment : Fragment(R.layout.fragment_second) {
         builder.create().show()
     }
 
+    // Fungsi untuk menampilkan TimePickerDialog
+    private fun showTimePickerDialog(taskDateTextView: TextView, selectedDateTime: Calendar) {
+        val hour = selectedDateTime.get(Calendar.HOUR_OF_DAY)
+        val minute = selectedDateTime.get(Calendar.MINUTE)
+
+        val timePickerDialog = TimePickerDialog(
+            requireContext(),
+            { _, selectedHour, selectedMinute ->
+                selectedDateTime.set(Calendar.HOUR_OF_DAY, selectedHour)
+                selectedDateTime.set(Calendar.MINUTE, selectedMinute)
+
+                val dateFormat = SimpleDateFormat("EEE, d MMM yyyy hh:mm a", Locale.getDefault())
+                taskDateTextView.text = dateFormat.format(selectedDateTime.time)
+            },
+            hour, minute, false
+        )
+        timePickerDialog.show()
+    }
+
     // Fungsi untuk menyimpan perubahan task
     private fun editTask(task: Task) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid
@@ -248,6 +277,11 @@ class SecondFragment : Fragment(R.layout.fragment_second) {
                 .document(task.id)
                 .set(task)
                 .addOnSuccessListener {
+                    // Update user's progress/level when the task done
+                    if (task.status == TaskStatus.DONE.value) {
+                        updateProgressAndLevelUp(userId)
+                    }
+
                     fetchTasks() // Refresh the task list
                 }
                 .addOnFailureListener { e ->
@@ -274,27 +308,72 @@ class SecondFragment : Fragment(R.layout.fragment_second) {
         }
     }
 
-    // Fungsi untuk membuat ID unik
-    private fun generateId(): String {
-        return System.currentTimeMillis().toString()
+    private fun startTask(task: Task) {
+        task.status = TaskStatus.IN_PROGRESS.value
+
+        editTask(task)
+
+        val bundle = Bundle()
+        bundle.putSerializable("startedTask", task)
+
+        val firstFragment = FirstFragment()
+        firstFragment.arguments = bundle
+
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.flFragment, firstFragment)
+            .addToBackStack(null)
+            .commit()
     }
 
-    // Fungsi untuk menampilkan TimePickerDialog
-    private fun showTimePickerDialog(taskDateTextView: TextView, selectedDateTime: Calendar) {
-        val hour = selectedDateTime.get(Calendar.HOUR_OF_DAY)
-        val minute = selectedDateTime.get(Calendar.MINUTE)
+    private fun updateUserProgress(progress: Progress): Progress {
+        val baseTasksPerLevel = 5
 
-        val timePickerDialog = TimePickerDialog(
-            requireContext(),
-            { _, selectedHour, selectedMinute ->
-                selectedDateTime.set(Calendar.HOUR_OF_DAY, selectedHour)
-                selectedDateTime.set(Calendar.MINUTE, selectedMinute)
+        // Calculate the number of tasks required for the next level
+        var requiredTasks = baseTasksPerLevel * progress.level
 
-                val dateFormat = SimpleDateFormat("EEE, d MMM yyyy hh:mm a", Locale.getDefault())
-                taskDateTextView.text = dateFormat.format(selectedDateTime.time)
-            },
-            hour, minute, false
-        )
-        timePickerDialog.show()
+        // Increase the number of tasks per level based on level milestones
+        if (progress.level % 10 == 0) {
+            // If level is a multiple of 10, increase the required tasks by 5 more
+            requiredTasks += 5
+        }
+
+        // Check if the user has completed enough tasks to level up
+        val newCompletedTasks = progress.completedTasks + 1
+
+        // Check if the user reached the required tasks for the next level
+        var newLevel = progress.level
+        if (newCompletedTasks >= requiredTasks) {
+            newLevel++
+        }
+
+        return Progress(level = newLevel, completedTasks = newCompletedTasks)
+    }
+
+    // Update progress and level when a task is completed
+    private fun updateProgressAndLevelUp(userId: String) {
+        db.collection("progress")
+            .document(userId)
+            .get()
+            .addOnSuccessListener { document ->
+                val currentProgress = document.toObject(Progress::class.java)
+                if (currentProgress != null) {
+                    // Update progress (increment tasks and potentially level up)
+                    val updatedProgress = updateUserProgress(currentProgress)
+
+                    // Update the new progress
+                    db.collection("progress")
+                        .document(userId)
+                        .set(updatedProgress)
+                        .addOnSuccessListener {
+                            Log.d("Second Fragment", "Updating progress successfully")
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("Second Fragment", "Error updating progress: ${e.message}", e)
+                        }
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("Second Fragment", "Error getting progress for update: ${e.message}", e)
+            }
     }
 }

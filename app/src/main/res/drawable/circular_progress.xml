@@ -1,26 +1,27 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Background circle -->
+    <!-- Background ring -->
     <item android:id="@android:id/background">
-        <shape android:shape="ring" android:useLevel="false">
-            <solid android:color="#D9D9D9" />
+        <shape
+            android:shape="ring"
+            android:useLevel="false">
+            <solid android:color="@color/primary_light" />
             <size
-                android:width="8dp"
-                android:height="8dp" />
-            <thickness android:thickness="12dp" />
+                android:width="80dp"
+                android:height="80dp" />
+            <thickness android:thickness="16dp" />
         </shape>
     </item>
 
-    <!-- Progress circle -->
     <item android:id="@android:id/progress">
-        <shape android:shape="ring" android:useLevel="true">
+        <shape android:shape="ring">
             <gradient
-                android:startColor="#4CAF50"
-                android:endColor="#2E7D32"
-                android:angle="0" />
+                android:angle="0"
+                android:endColor="@color/stroke_primary"
+                android:startColor="@color/stroke_primary" />
             <size
-                android:width="8dp"
-                android:height="8dp" />
+                android:width="80dp"
+                android:height="80dp" />
             <thickness android:thickness="16dp" />
         </shape>
     </item>
