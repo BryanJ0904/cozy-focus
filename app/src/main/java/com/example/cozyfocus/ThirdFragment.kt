@@ -1,19 +1,19 @@
 package com.example.cozyfocus
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
-import com.example.cozyfocus.R
+import androidx.fragment.app.Fragment
+import com.example.cozyfocus.model.Progress
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 class ThirdFragment : Fragment(R.layout.fragment_third) {
+    private val db = FirebaseFirestore.getInstance()
 
     private lateinit var tvLevel: TextView
     private lateinit var tvTasks: TextView
@@ -24,77 +24,85 @@ class ThirdFragment : Fragment(R.layout.fragment_third) {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_third, container, false)
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
 
-        // Initialize views
         tvLevel = view.findViewById(R.id.tv_level)
         tvTasks = view.findViewById(R.id.tv_tasks)
         progressBar = view.findViewById(R.id.progress_circle)
         tvInstruction = view.findViewById(R.id.tv_instruction)
 
-        // Fetch user level data from Firebase
-        fetchLevelData(view)
+        // Ensure the user has a progress document or create one if it doesn't exist
+        userId?.let { checkAndCreateProgressDocument(it) }
 
         return view
     }
 
-    private fun fetchLevelData(view: View) {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        val userRef = FirebaseFirestore.getInstance().collection("Users").document(userId)
+    // Check if the user already has a progress document, if not, create one
+    private fun checkAndCreateProgressDocument(userId: String) {
+        db.collection("progress")
+            .document(userId)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    // Document exists, load progress data
+                    val progress = document.toObject(Progress::class.java)
+                    progress?.let {
+                        // Calculate required tasks for the current level
+                        val requiredTasks = calculateRequiredTasks(it.level)
+                        val remainingTasks = requiredTasks - it.completedTasks
 
-        userRef.get().addOnSuccessListener { document ->
-            if (document.exists()) {
-                val level = document.getLong("level")?.toInt() ?: 1
-                var tasksCompleted = document.getLong("tasksCompleted")?.toInt() ?: 0
-                var tasksRequired = document.getLong("tasksRequired")?.toInt() ?: 5
+                        tvLevel.text = "Level ${it.level}"
+                        tvTasks.text = "${it.completedTasks}/$requiredTasks"
+                        progressBar.max = requiredTasks
+                        progressBar.progress = it.completedTasks
 
-                val incrementButton = view.findViewById<Button>(R.id.btn_increment_task)
-                incrementButton?.setOnClickListener {
-                    if (tasksCompleted < tasksRequired) {
-                        val updatedTasksCompleted = tasksCompleted + 1
-
-                        userRef.update("tasksCompleted", updatedTasksCompleted)
-                            .addOnSuccessListener {
-                                tasksCompleted = updatedTasksCompleted
-                                updateUI(level, tasksCompleted, tasksRequired)
-                            }
-                            .addOnFailureListener { e ->
-                                Toast.makeText(context, "Failed to update progress: ${e.message}", Toast.LENGTH_SHORT).show()
-                            }
-                    } else {
-                        Toast.makeText(context, "All tasks completed!", Toast.LENGTH_SHORT).show()
+                        tvInstruction.text = "Finish $remainingTasks more tasks to level up. Next level: ${it.level + 1}"
                     }
+                } else {
+                    // Document does not exist, create a new one
+                    createProgressDocument(userId)
                 }
-
-                updateUI(level, tasksCompleted, tasksRequired)
             }
-        }
+            .addOnFailureListener { e ->
+                Log.e("ThirdFragment", "Error getting progress document: ${e.message}", e)
+            }
     }
 
-    private fun updateUI(level: Int, tasksCompleted: Int, tasksRequired: Int) {
-        tvLevel.text = "Level $level"
-        tvTasks.text = "$tasksCompleted/$tasksRequired"
-        progressBar.max = tasksRequired
-        progressBar.progress = tasksCompleted;
-        //progressBar.progress = tasksCompleted
-        tvInstruction.text = "Finish $tasksRequired tasks to level up."
+    // Create or initialize a progress document for a new user
+    private fun createProgressDocument(userId: String) {
+        val progress = Progress(level = 1, completedTasks = 0)
 
-        if (tasksCompleted >= tasksRequired) {
-            levelUp(level)
-        }
+        db.collection("progress")
+            .document(userId)
+            .set(progress)
+            .addOnSuccessListener {
+                // Set initial progress
+                tvLevel.text = "Level 1"
+                tvTasks.text = "0/5"
+                progressBar.progress = 0
+
+                tvInstruction.text = "Finish 5 tasks to level up. Next level: 2"
+            }
+            .addOnFailureListener { e ->
+                Log.e("ThirdFragment", "Error creating progress document: ${e.message}", e)
+            }
     }
 
-    private fun levelUp(currentLevel: Int) {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        val userRef = FirebaseFirestore.getInstance().collection("Users").document(userId)
+    // Calculate the number of tasks required for the next level
+    private fun calculateRequiredTasks(level: Int): Int {
+        // Define base number of tasks per level
+        val baseTasksPerLevel = 5
 
-        userRef.update(mapOf(
-            "level" to currentLevel + 1,
-            "tasksCompleted" to 0,
-            "tasksRequired" to (currentLevel + 1) * 5 // Increment tasks required
-        )).addOnSuccessListener {
-            fetchLevelData(requireView()) // Use requireView() to safely access the view
+        // Calculate the required tasks for the current level
+        var requiredTasks = baseTasksPerLevel * level
+
+        // Increase the number of tasks per level based on level milestones
+        if (level % 10 == 0) {
+            // If level is a multiple of 10, increase the required tasks by 5 more
+            requiredTasks += 5
         }
+
+        return requiredTasks
     }
 }

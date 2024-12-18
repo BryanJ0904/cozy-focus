@@ -11,8 +11,21 @@
         android:textSize="24sp"
         android:textColor="@android:color/white"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="250dp" />
+        android:layout_marginTop="130dp" />
 
+    <!-- Progress Bar -->
+    <ProgressBar
+        android:id="@+id/progress_circle"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="230dp"
+        android:layout_height="230dp"
+        android:indeterminate="false"
+        android:max="5"
+        android:progress="0"
+        android:layout_centerInParent="true"
+        android:progressDrawable="@drawable/circular_progress" />
+
+    <!-- TextView inside the ProgressBar, centered -->
     <TextView
         android:id="@+id/tv_tasks"
         android:layout_width="wrap_content"
@@ -21,20 +34,6 @@
         android:text="4/5"
         android:textSize="20sp"
         android:textColor="@android:color/white" />
-
-    <ProgressBar
-        android:id="@+id/progress_circle"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="150dp"
-        android:layout_height="10dp"
-        android:layout_below="@+id/tv_tasks"
-        android:layout_centerHorizontal="true"
-        android:indeterminate="false"
-        android:max="5"
-        android:progress="4"
-        android:layout_marginTop="15dp"
-        android:progressDrawable="@drawable/progress_bar"
-        />
 
     <TextView
         android:id="@+id/tv_instruction"
@@ -46,14 +45,4 @@
         android:textColor="@android:color/white"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="30dp" />
-
-    <Button
-        android:id="@+id/btn_increment_task"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/tv_instruction"
-        android:layout_centerHorizontal="true"
-        android:text="Complete Task"
-        android:layout_marginTop="30dp" />
-
 </RelativeLayout>
