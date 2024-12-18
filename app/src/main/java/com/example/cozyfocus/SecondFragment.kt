@@ -224,18 +224,29 @@ class SecondFragment : Fragment(R.layout.fragment_second) {
         // Update and Delete options
         builder.setView(dialogView)
             .setTitle("Edit Task")
-            .setPositiveButton("Update") { dialog, _ ->
-                val updatedTaskTitle = taskTitleEditText.text.toString()
-                val updatedTaskStatus = TaskStatus.values()[taskStatusSpinner.selectedItemPosition]
+            .apply {
+                // Check if the task status is DONE
+                if (task.status == TaskStatus.DONE.ordinal) {
+                    // Disable the status spinner and update button
+                    taskStatusSpinner.isEnabled = false
+                    taskTitleEditText.isEnabled = false // Optional: Disable editing the title
+                    setPositiveButton("Update", null) // Disable the "Update" button entirely
+                } else {
+                    setPositiveButton("Update") { dialog, _ ->
+                        val updatedTaskTitle = taskTitleEditText.text.toString()
+                        val updatedTaskStatus =
+                            TaskStatus.values()[taskStatusSpinner.selectedItemPosition]
 
-                val updatedTask = task.copy(
-                    title = updatedTaskTitle,
-                    date = Timestamp(selectedDateTime.time),
-                    status = updatedTaskStatus.ordinal
-                )
+                        val updatedTask = task.copy(
+                            title = updatedTaskTitle,
+                            date = Timestamp(selectedDateTime.time),
+                            status = updatedTaskStatus.ordinal
+                        )
 
-                editTask(updatedTask)
-                dialog.dismiss()
+                        editTask(updatedTask)
+                        dialog.dismiss()
+                    }
+                }
             }
             .setNegativeButton("Cancel") { dialog, _ ->
                 dialog.dismiss()

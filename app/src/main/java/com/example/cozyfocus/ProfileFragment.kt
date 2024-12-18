@@ -1,6 +1,7 @@
 package com.example.cozyfocus
 
 import android.Manifest
+import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -28,6 +29,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
+import com.example.cozyfocus.model.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
@@ -56,6 +58,7 @@ class ProfileFragment : Fragment() {
         val profileTitle = view.findViewById<TextView>(R.id.profile_title)
         val editButton = view.findViewById<TextView>(R.id.edit_button)
         val logoutButton = view.findViewById<Button>(R.id.logout_button)
+        val creditButton = view.findViewById<TextView>(R.id.credit_button)
         profilePicture = view.findViewById<ImageView>(R.id.profile_photo)
 
         val userId = auth.currentUser?.uid
@@ -104,6 +107,10 @@ class ProfileFragment : Fragment() {
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
             requireActivity().finish()
+        }
+
+        creditButton.setOnClickListener {
+            showCreditDialog()
         }
     }
 
@@ -176,4 +183,21 @@ class ProfileFragment : Fragment() {
 
         return output
     }
+
+    private fun showCreditDialog() {
+        val builder = AlertDialog.Builder(requireContext())
+
+        val inflater = layoutInflater
+        val dialogView = inflater.inflate(R.layout.credit, null)
+
+        builder.setView(dialogView)
+        builder.setTitle("Credits")
+        builder.setPositiveButton("OK") { dialog, _ ->
+            dialog.dismiss()
+        }
+
+        val dialog = builder.create()
+        dialog.show()
+    }
+
 }
