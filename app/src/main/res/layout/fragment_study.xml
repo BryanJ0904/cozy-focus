@@ -1,10 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rootLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/bg">
-    <View
+    android:layout_height="match_parent">
+
+    <!-- Background Image Section -->
+    <ImageView
+        android:id="@+id/backgroundImageView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        tools:ignore="ContentDescription" />
+
+    <!-- Timer Background Section -->
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/timerBackground"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -18,6 +29,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0" />
 
+    <!-- Tab Layout for Focus, Break, and Rest -->
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout"
         android:layout_width="0dp"
@@ -28,11 +40,12 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/timerBackground" />
 
+    <!-- Timer Display -->
     <TextView
         android:id="@+id/tvTimer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="00:10"
+        android:text="00:05"
         android:textColor="#FFFFFF"
         android:textSize="64sp"
         android:textStyle="bold"
@@ -43,6 +56,7 @@
         app:layout_constraintTop_toBottomOf="@id/tabLayout"
         app:layout_constraintVertical_bias="0.258" />
 
+    <!-- Reset Button -->
     <ImageButton
         android:id="@+id/btnReset"
         android:layout_width="wrap_content"
@@ -54,6 +68,7 @@
         app:layout_constraintBottom_toBottomOf="@id/btnStart"
         android:layout_marginEnd="8dp" />
 
+    <!-- Start Button -->
     <Button
         android:id="@+id/btnStart"
         android:layout_width="wrap_content"
@@ -64,15 +79,48 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp" />
 
+    <!-- Arrow Button to Change Background -->
     <ImageButton
-        android:id="@+id/btnSettings"
+        android:id="@+id/arrow_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_margin="16dp"
+        android:layout_marginTop="24dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Change Background"
+        android:src="@drawable/arrow"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.71"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Background Name Display -->
+    <TextView
+        android:id="@+id/bg_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/setting"
-        android:contentDescription="Settings"
-        android:background="?attr/selectableItemBackground"
-        app:layout_constraintStart_toEndOf="@id/btnStart"
-        app:layout_constraintBottom_toBottomOf="@id/btnStart"
-        android:layout_marginStart="8dp" />
+        android:layout_marginEnd="16dp"
+        android:text="Rainy Day"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@id/arrow_button"
+        app:layout_constraintEnd_toStartOf="@id/arrow_button"
+        app:layout_constraintTop_toTopOf="@id/arrow_button"
+        app:layout_constraintVertical_bias="0.666" />
+
+    <!-- Lock Icon -->
+    <ImageView
+        android:id="@+id/lockIcon"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_margin="16dp"
+        android:src="@drawable/lock"
+        android:contentDescription="Lock Icon"
+        android:visibility="gone"
+        android:scaleType="centerInside"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

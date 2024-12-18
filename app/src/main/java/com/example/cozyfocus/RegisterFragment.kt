@@ -1,5 +1,6 @@
 package com.example.cozyfocus
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -41,7 +42,7 @@ class RegisterFragment : Fragment() {
         loginButton.setOnClickListener {
             val loginFragment = LoginFragment()
             parentFragmentManager.beginTransaction()
-                .replace(R.id.display, loginFragment)
+                .replace(R.id.flFragment, loginFragment)
                 .addToBackStack(null)
                 .commit()
         }
@@ -65,10 +66,11 @@ class RegisterFragment : Fragment() {
                                 val user = auth.currentUser
                                 saveUserData(nama)
                                 val profileFragment = ProfileFragment()
-                                parentFragmentManager.beginTransaction()
-                                    .replace(R.id.display, profileFragment)
-                                    .addToBackStack(null)
-                                    .commit()
+                                val intent = Intent(requireContext(), MainActivity::class.java)
+                                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK  // Clear the task stack
+                                startActivity(intent)
+                                requireActivity().finish()
+
                                 Toast.makeText(requireContext(), "Registrasi berhasil!", Toast.LENGTH_SHORT).show()
 
                                 val userId = auth.currentUser?.uid

@@ -1,20 +1,48 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/thirdFragment"
+        android:id="@+id/tv_level"
+        style="@style/title_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:text="Level 1"
+        android:textSize="24sp"
+        android:textColor="@android:color/white"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="130dp" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- Progress Bar -->
+    <ProgressBar
+        android:id="@+id/progress_circle"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="230dp"
+        android:layout_height="230dp"
+        android:indeterminate="false"
+        android:max="5"
+        android:progress="0"
+        android:layout_centerInParent="true"
+        android:progressDrawable="@drawable/circular_progress" />
+
+    <!-- TextView inside the ProgressBar, centered -->
+    <TextView
+        android:id="@+id/tv_tasks"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="4/5"
+        android:textSize="20sp"
+        android:textColor="@android:color/white" />
+
+    <TextView
+        android:id="@+id/tv_instruction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/progress_circle"
+        android:text="Finish 5 tasks to level up."
+        android:textSize="16sp"
+        android:textColor="@android:color/white"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp" />
+</RelativeLayout>

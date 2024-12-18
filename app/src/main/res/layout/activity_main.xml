@@ -6,17 +6,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="centerCrop"
-        android:src="@drawable/bg1"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <!-- Background Image -->
 
+    <!-- AppBar with Toolbar and Volume Button -->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBar"
         android:layout_width="match_parent"
@@ -29,38 +21,52 @@
             android:layout_height="?attr/actionBarSize"
             android:background="#000000">
 
+            <!-- Volume Button -->
             <ImageButton
                 android:id="@+id/volume_button"
                 android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@android:color/transparent"
-            android:src="@drawable/music"
-            android:layout_gravity="end"
-            android:layout_marginEnd="10dp"
-            android:padding="8dp" />
+                android:layout_height="40dp"
+                android:layout_gravity="end"
+                android:background="@android:color/transparent"
+                android:clickable="true"
+                android:focusable="true"
+                android:src="@drawable/music"
+                app:layout_constraintEnd_toStartOf="@id/notification_button"
+                app:layout_constraintTop_toTopOf="parent" />
 
-
-
+            <!-- Notification Button -->
             <ImageButton
                 android:id="@+id/notification_button"
                 android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@android:color/transparent"
-            android:src="@drawable/bell"
-            android:layout_gravity="end"
-            android:padding="10dp" />
+                android:layout_height="40dp"
+                android:layout_gravity="end"
+                android:background="@android:color/transparent"
+                android:padding="10dp"
+                android:src="@drawable/bell"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
         </com.google.android.material.appbar.MaterialToolbar>
     </com.google.android.material.appbar.AppBarLayout>
 
+    <!-- Fragment Container -->
     <FrameLayout
         android:id="@+id/flFragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintTop_toBottomOf="@id/appBar"
-        app:layout_constraintBottom_toTopOf="@+id/bottomNavigationView"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent" >
 
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:src="@drawable/bg1" />
+    </FrameLayout>
+
+    <!-- Bottom Navigation View -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"
         android:layout_width="match_parent"
@@ -72,4 +78,5 @@
         app:itemIconTint="@color/bottom_nav_color"
         app:itemTextColor="@color/bottom_nav_color"
         android:background="@android:color/black" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -16,4 +16,6 @@
     <color name="primary_light">#d2d3eb</color>
     <color name="secondary_light">#EBEAD2</color>
 
+    <color name="toolbar_background">#FF000000</color>
+
 </resources>
