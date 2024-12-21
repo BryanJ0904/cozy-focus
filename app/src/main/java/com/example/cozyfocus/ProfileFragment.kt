@@ -56,7 +56,8 @@ class ProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val profileTitle = view.findViewById<TextView>(R.id.profile_title)
-        val editButton = view.findViewById<TextView>(R.id.edit_button)
+        val editProfilePictureButton = view.findViewById<TextView>(R.id.edit_profile_button)
+        val editButton = view.findViewById<Button>(R.id.edit_button)
         val logoutButton = view.findViewById<Button>(R.id.logout_button)
         val creditButton = view.findViewById<TextView>(R.id.credit_button)
         profilePicture = view.findViewById<ImageView>(R.id.profile_photo)
@@ -74,7 +75,7 @@ class ProfileFragment : Fragment() {
                         val bitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
                         profilePicture.setImageBitmap(bitmap)
                     } else {
-                        Toast.makeText(requireContext(), "Foto profil tidak ditemukan!", Toast.LENGTH_SHORT).show()
+                        profilePicture.setImageResource(R.drawable.ic_placeholder_image)
                     }
                 }
             }.addOnFailureListener { exception ->
@@ -84,7 +85,15 @@ class ProfileFragment : Fragment() {
             Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show()
         }
 
-        editButton.setOnClickListener {
+        editButton.setOnClickListener{
+            val editProfileFragment = EditProfileFragment()
+            val transaction = requireActivity().supportFragmentManager.beginTransaction()
+            transaction.replace(R.id.flFragment, editProfileFragment, "EditProfileFragment")
+            transaction.addToBackStack(null)
+            transaction.commit()
+        }
+
+        editProfilePictureButton.setOnClickListener {
             // Handle Camera Permission and open camera
             if (ContextCompat.checkSelfPermission(
                     requireContext(),

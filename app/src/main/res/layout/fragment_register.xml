@@ -107,7 +107,7 @@
         <Button
             android:id="@+id/submit_button"
             style="@style/button"
-            android:layout_width="194dp"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:text="@string/regist_button" />
 
@@ -121,7 +121,7 @@
                 android:id="@+id/instruction_text"
                 style="@style/desc_text"
                 android:layout_width="wrap_content"
-                android:layout_height="40dp"
+                android:layout_height="20dp"
                 android:gravity="center"
                 android:text="Already have account? " />
 
@@ -129,7 +129,7 @@
                 android:id="@+id/login_button"
                 style="@style/clickable_text"
                 android:layout_width="wrap_content"
-                android:layout_height="40dp"
+                android:layout_height="20dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"

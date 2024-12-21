@@ -14,10 +14,12 @@ import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.cozyfocus.adapter.TaskAdapter
 import com.example.cozyfocus.enums.TaskStatus
+import com.example.cozyfocus.enums.TaskStatus.NOT_STARTED
 import com.example.cozyfocus.model.Progress
 import com.example.cozyfocus.model.Task
 import com.google.firebase.Timestamp
@@ -100,6 +102,7 @@ class SecondFragment : Fragment(R.layout.fragment_second) {
         val taskTitleEditText = dialogView.findViewById<EditText>(R.id.newTaskTitle)
         val taskDateTextView = dialogView.findViewById<TextView>(R.id.newTaskDate)
         val taskStatusSpinner = dialogView.findViewById<Spinner>(R.id.newTaskStatus)
+        taskStatusSpinner.visibility = View.GONE
 
         var selectedDateTime = Calendar.getInstance()
 
@@ -129,20 +132,20 @@ class SecondFragment : Fragment(R.layout.fragment_second) {
             TaskStatus.values().map { it.getDisplayName() }
         )
         taskStatusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        taskStatusSpinner.adapter = taskStatusAdapter
+        //taskStatusSpinner.adapter = taskStatusAdapter
 
         builder.setView(dialogView)
             .setTitle("Add New Task")
             .setPositiveButton("Add") { dialog, _ ->
                 val taskTitle = taskTitleEditText.text.toString()
-                val taskStatusPosition = taskStatusSpinner.selectedItemPosition
-                val taskStatus = TaskStatus.values()[taskStatusPosition]
+                //val taskStatusPosition = taskStatusSpinner.selectedItemPosition
+                //val taskStatus = TaskStatus.values()[taskStatusPosition]
 
                 val newTask = Task(
                     id = generateId(),
                     title = taskTitle,
                     date = Timestamp(selectedDateTime.time),
-                    status = taskStatus.ordinal
+                    status = 0
                 )
 
                 addTask(newTask)
@@ -321,6 +324,9 @@ class SecondFragment : Fragment(R.layout.fragment_second) {
 
     private fun startTask(task: Task) {
         task.status = TaskStatus.IN_PROGRESS.value
+
+        val taskViewModel = ViewModelProvider(requireActivity()).get(TaskViewModel::class.java)
+        taskViewModel.task.value = task
 
         editTask(task)
 
