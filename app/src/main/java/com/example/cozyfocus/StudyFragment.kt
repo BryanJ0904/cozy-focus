@@ -4,6 +4,7 @@ import com.google.android.material.tabs.TabLayout
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,7 +13,10 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.example.cozyfocus.R
+import com.example.cozyfocus.model.Progress
 
 class StudyFragment : Fragment() {
 
@@ -22,7 +26,7 @@ class StudyFragment : Fragment() {
     private lateinit var btnReset: ImageButton
     private lateinit var backgroundImageView: ImageView
     private lateinit var arrowButton: ImageButton
-    private lateinit var lockIcon: ImageView  // Tambahkan ImageView untuk lock
+    private lateinit var lockIcon: ImageView
     private lateinit var bgNameTextView: TextView
     private var timer: CountDownTimer? = null
     private var mediaPlayer: MediaPlayer? = null
@@ -30,11 +34,12 @@ class StudyFragment : Fragment() {
     private var currentTimerDuration = initialTimerDuration
     private var currentTabIndex = 0
     private var currentBackgroundIndex = 0
+    private var currentLevel = 1 // Level saat ini
 
     // Daftar latar belakang dan musik terkait
     private val backgrounds = listOf(
         Pair("Rain", Pair(R.drawable.bg, R.raw.rain)),
-        Pair("Sky", Pair(R.drawable.sky, R.raw.sky)),  // Contoh background lainnya
+        Pair("Sky", Pair(R.drawable.sky, R.raw.sky)),
         Pair("Sea", Pair(R.drawable.sea, R.raw.sea)),
         Pair("Cafe", Pair(R.drawable.cafe, R.raw.cafe))
     )
@@ -49,13 +54,17 @@ class StudyFragment : Fragment() {
 
         // Initialize views
         backgroundImageView = view.findViewById(R.id.backgroundImageView)
-        lockIcon = view.findViewById(R.id.lockIcon)  // Menghubungkan lockIcon
+        lockIcon = view.findViewById(R.id.lockIcon)
         bgNameTextView = view.findViewById(R.id.bg_name)
         arrowButton = view.findViewById(R.id.arrow_button)
         tabLayout = view.findViewById(R.id.tabLayout)
         tvTimer = view.findViewById(R.id.tvTimer)
         btnStart = view.findViewById(R.id.btnStart)
         btnReset = view.findViewById(R.id.btnReset)
+
+        // Fetch user level from Firestore (pastikan levelnya tersimpan)
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        fetchUserLevel(userId)
 
         // Button untuk mengganti background
         arrowButton.setOnClickListener {
@@ -99,8 +108,29 @@ class StudyFragment : Fragment() {
         updateTimerDuration(0)
     }
 
-    // Update untuk menampilkan atau menyembunyikan ikon kunci
+    // Fetch user level from Firestore
+    private fun fetchUserLevel(userId: String) {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("progress")
+            .document(userId)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val progress = document.toObject(Progress::class.java)
+                    progress?.let {
+                        currentLevel = it.level
+                        updateBackground() // Memperbarui background berdasarkan level
+                    }
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("StudyFragment", "Error fetching user level: ${e.message}", e)
+            }
+    }
+
+    // Update background dan musik saat user naik level
     private fun updateBackground() {
+        // Dapatkan latar belakang dan musik sesuai dengan index background
         val (name, pair) = backgrounds[currentBackgroundIndex]
         val (bgResId, songResId) = pair
 
@@ -111,11 +141,11 @@ class StudyFragment : Fragment() {
         // Set nama latar belakang
         bgNameTextView.text = name
 
-        // Menampilkan ikon kunci hanya untuk latar belakang selain "Rain"
-        if (name != "Rain") {
-            lockIcon.visibility = View.VISIBLE  // Menampilkan ikon kunci untuk latar belakang yang terkunci
+        // Menyembunyikan atau menampilkan ikon kunci berdasarkan level
+        if (currentBackgroundIndex >= currentLevel) {
+            lockIcon.visibility = View.VISIBLE  // Latar belakang terkunci
         } else {
-            lockIcon.visibility = View.GONE  // Menyembunyikan ikon kunci jika background adalah Rain
+            lockIcon.visibility = View.GONE  // Latar belakang sudah dibuka
         }
     }
 
@@ -197,3 +227,4 @@ class StudyFragment : Fragment() {
         mediaPlayer = null
     }
 }
+

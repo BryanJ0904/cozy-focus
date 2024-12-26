@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.example.cozyfocus.model.Progress
 import com.google.firebase.auth.FirebaseAuth
@@ -19,6 +20,16 @@ class ThirdFragment : Fragment(R.layout.fragment_third) {
     private lateinit var tvTasks: TextView
     private lateinit var progressBar: ProgressBar
     private lateinit var tvInstruction: TextView
+
+    private val backgrounds = listOf(
+        Pair("Rain", Pair(R.drawable.bg, R.raw.rain)),
+        Pair("Sky", Pair(R.drawable.sky, R.raw.sky)),
+        Pair("Sea", Pair(R.drawable.sea, R.raw.sea)),
+        Pair("Cafe", Pair(R.drawable.cafe, R.raw.cafe))
+    )
+
+    private var currentLevel = 1 // Default level
+    private var currentBackgroundIndex = 0 // Default background index
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -58,6 +69,9 @@ class ThirdFragment : Fragment(R.layout.fragment_third) {
                         progressBar.progress = it.completedTasks
 
                         tvInstruction.text = "Finish $remainingTasks more tasks to level up. Next level: ${it.level + 1}"
+
+                        // Unlock background when user reaches a new level
+                        unlockBackground(it.level)
                     }
                 } else {
                     // Document does not exist, create a new one
@@ -104,5 +118,16 @@ class ThirdFragment : Fragment(R.layout.fragment_third) {
         }
 
         return requiredTasks
+    }
+
+    // Unlock background based on the level
+    private fun unlockBackground(level: Int) {
+        if (level <= backgrounds.size) {
+            val (name, _) = backgrounds[level - 1]
+            // Display the congratulatory message
+            Toast.makeText(context, "Congrats! You have just unlocked the $name background!", Toast.LENGTH_SHORT).show()
+            // Update the background state or internal UI to unlock it
+            currentBackgroundIndex = level - 1 // Set the background index
+        }
     }
 }
