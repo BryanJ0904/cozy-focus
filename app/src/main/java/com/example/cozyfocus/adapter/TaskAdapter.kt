@@ -30,7 +30,7 @@ class TaskAdapter(
         private val editTask: ImageView = itemView.findViewById(R.id.editTask)
         private val startTask: ImageView = itemView.findViewById(R.id.startTask)
 
-        fun bind(task: Task, onEditClick: (Task) -> Unit, onDeleteClick: (Task) -> Unit) {
+        fun bind(task: Task, onEditClick: (Task) -> Unit, onDeleteClick: (Task) -> Unit, onStartTask: (Task) -> Unit) {
             taskCheckbox.isChecked = task.status == TaskStatus.DONE.ordinal
             taskDate.text = formatDate(task.date)
             taskTitle.text = task.title
@@ -42,7 +42,7 @@ class TaskAdapter(
 
 
             editTask.setOnClickListener { onEditClick(task) }
-            startTask.setOnClickListener(null)
+            startTask.setOnClickListener { onStartTask(task) }
         }
 
         private fun formatDate(date: Timestamp): String {
@@ -58,7 +58,7 @@ class TaskAdapter(
     }
 
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
-        holder.bind(tasks[position], onEditClick, onDeleteClick)
+        holder.bind(tasks[position], onEditClick, onDeleteClick, onStartTask)
     }
 
     override fun getItemCount(): Int = tasks.size
