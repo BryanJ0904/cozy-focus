@@ -1,30 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:paddingTop="100dp"
-    tools:context=".LoginFragment">
+    tools:context=".EditProfileFragment">
 
     <TextView
-        android:id="@+id/login_title"
+        android:id="@+id/edit_profile"
         style="@style/title_text"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="@string/login" />
+        android:text="@string/edit_profile" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/nama_input_wrapper"
+        style="@style/text_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Username"
+        android:textColorHint="@color/white"
+        app:boxStrokeColor="@color/stroke_primary"
+        app:hintTextColor="@color/stroke_primary">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/nama_input_field"
+            style="@style/desc_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableStart="@drawable/user"
+            android:drawablePadding="8dp"
+            android:inputType="text" />
+    </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/email_input_wraper"
         style="@style/text_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/email_input_message"
+        android:hint="Email"
         android:textColorHint="@color/white"
         app:boxStrokeColor="@color/stroke_primary"
-        app:errorTextColor="@color/stroke_primary"
         app:hintTextColor="@color/stroke_primary">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -37,27 +57,6 @@
             android:inputType="text" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/password_input_wraper"
-        style="@style/text_input"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/password_input_message"
-        android:textColorHint="@color/white"
-        app:boxStrokeColor="@color/stroke_primary"
-        app:errorTextColor="@color/stroke_primary"
-        app:hintTextColor="@color/stroke_primary">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/password_input_field"
-            style="@style/desc_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:drawableStart="@drawable/password"
-            android:drawablePadding="8dp"
-            android:inputType="text" />
-    </com.google.android.material.textfield.TextInputLayout>
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -66,11 +65,11 @@
         android:orientation="vertical">
 
         <Button
-            android:id="@+id/submit_button"
+            android:id="@+id/confirm_button"
             style="@style/button"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
-            android:text="@string/login_button" />
+            android:text="@string/confirm_button" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -79,30 +78,14 @@
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/instruction_text"
-                style="@style/desc_text"
-                android:layout_width="wrap_content"
-                android:layout_height="20dp"
-                android:gravity="center"
-                android:text="Don't have an account? " />
-
-            <TextView
-                android:id="@+id/regist_button"
-                style="@style/clickable_text"
+                android:id="@+id/change_password_button"
+                style="@style/underlined_text"
                 android:layout_width="wrap_content"
                 android:layout_height="20dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
-                android:text="Sign Up"
-                android:textStyle="bold" /> <!-- Change color as needed -->
+                android:text="@string/change_password" />
         </LinearLayout>
     </LinearLayout>
-<!--    <Button-->
-<!--        android:id="@+id/regist_button"-->
-<!--        style="@style/button"-->
-<!--        android:layout_width="200dp"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:text="@string/regist_button" />-->
-
 </LinearLayout>

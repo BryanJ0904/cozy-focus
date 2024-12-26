@@ -11,5 +11,14 @@
     <string name="regist_button">Register</string>
     <string name="login_button">Login</string>
     <string name="logout_button">Log Out</string>
-    <string name="submit_button">SUBMIT</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="submit_button">Submit</string>
+    <string name="confirm_button">Confirm</string>
+    <string name="credit_text"><u>Credit</u></string>
+    <string name="back"><u>Back</u></string>
+    <string name="change_password"><u>Change Password</u></string>
+    <string name="shabrina">Shabrina Firmansyah (00000076396)</string>
+    <string name="angel">Gisselle Angelina Tanuwidjaja (00000075514)</string>
+    <string name="alice">Alice Marybeth (00000077329)</string>
+    <string name="bryan">Bryan Jonathan (00000067594)</string>
 </resources>
