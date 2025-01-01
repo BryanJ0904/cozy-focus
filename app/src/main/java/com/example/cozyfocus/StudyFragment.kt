@@ -14,6 +14,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.google.android.material.tabs.TabLayout
 import androidx.appcompat.app.AlertDialog
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 
 class StudyFragment : Fragment() {
@@ -35,6 +36,7 @@ class StudyFragment : Fragment() {
     private lateinit var progressDots: List<ImageView>
     private var completedSteps = 0
     private var wasLastFocus = false
+    var isTimerRunning = false
 
     private val backgrounds = listOf(
         Pair("Rain", Pair(R.drawable.bg, R.raw.rain)),
@@ -61,6 +63,7 @@ class StudyFragment : Fragment() {
         backgroundImageView = view.findViewById(R.id.backgroundImageView)
         arrowButton = view.findViewById(R.id.arrow_button)
         bgNameTextView = view.findViewById(R.id.bg_name)
+        isTimerRunning = false
 
         arrowButton.setOnClickListener {
             currentBackgroundIndex = (currentBackgroundIndex + 1) % backgrounds.size
@@ -150,6 +153,8 @@ class StudyFragment : Fragment() {
     }
 
     private fun startTimer(duration: Long) {
+        toggleBottomNavigationView(false)
+        isTimerRunning = true
         timer?.cancel()
         btnStart.text = "Stop"
         timer = object : CountDownTimer(duration, 1000) {
@@ -165,6 +170,7 @@ class StudyFragment : Fragment() {
             override fun onFinish() {
                 btnStart.text = "Start"
                 updateTimerText(0)
+                toggleBottomNavigationView(true)
                 moveToNextTab()
             }
         }.start()
@@ -174,12 +180,19 @@ class StudyFragment : Fragment() {
         timer?.cancel()
         btnStart.text = "Start"
         updateTimerText(currentTimerDuration)
+        toggleBottomNavigationView(true)
     }
 
     private fun resetTimer() {
         stopTimer()
+        isTimerRunning = false
         currentTimerDuration = initialTimerDuration
         updateTimerText(currentTimerDuration)
+    }
+
+    private fun toggleBottomNavigationView(isVisible: Boolean) {
+        val bottomNavigationView = activity?.findViewById<BottomNavigationView>(R.id.bottomNavigationView)
+        bottomNavigationView?.visibility = if (isVisible) View.VISIBLE else View.GONE
     }
 
     private fun updateTimerText(millisUntilFinished: Long) {
@@ -236,11 +249,24 @@ class StudyFragment : Fragment() {
         }
     }
 
+    fun showNavigationAlert(menuItemId: Int) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Confirm Navigation")
+            .setMessage("Are you sure you want to leave? This action will reset the timer.")
+            .setPositiveButton("Yes") { _, _ ->
+                stopTimer() // Reset the timer
+                (activity as? MainActivity)?.navigateTo(menuItemId) // Navigate to the selected page
+            }
+            .setNegativeButton("No", null) // Do nothing
+            .show()
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         timer?.cancel()
         stopBackgroundMusic()
         countdownMediaPlayer?.release()
         countdownMediaPlayer = null
+        Log.d("StudyFragment", "onDestroyView called: Cleaning up resources")
     }
 }

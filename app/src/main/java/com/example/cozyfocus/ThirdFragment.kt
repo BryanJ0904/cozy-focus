@@ -123,10 +123,7 @@ class ThirdFragment : Fragment(R.layout.fragment_third) {
     // Unlock background based on the level
     private fun unlockBackground(level: Int) {
         if (level <= backgrounds.size) {
-            val (name, _) = backgrounds[level - 1]
-            // Display the congratulatory message
-            Toast.makeText(context, "Congrats! You have just unlocked the $name background!", Toast.LENGTH_SHORT).show()
-            // Update the background state or internal UI to unlock it
+            val (name, _) = backgrounds[level - 1] // Update the background state or internal UI to unlock it
             currentBackgroundIndex = level - 1 // Set the background index
         }
     }

@@ -11,7 +11,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mediaPlayer: MediaPlayer
     private var isPlaying = true
     private lateinit var volumeButton: ImageButton
-    private var isTimerRunning = false // Flag to check if timer is running
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,49 +37,117 @@ class MainActivity : AppCompatActivity() {
         // Setup BottomNavigationView with logic for switching fragments
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
         bottomNavigationView.setOnNavigationItemSelectedListener { menuItem ->
-            if (isTimerRunning) {
-                // Show a message or do nothing when trying to switch fragments during timer
-                Toast.makeText(this, "Please stop the timer before switching", Toast.LENGTH_SHORT).show()
-                return@setOnNavigationItemSelectedListener false
+            val currentFragment = supportFragmentManager.findFragmentById(R.id.flFragment)
+            if (currentFragment is StudyFragment && currentFragment.isTimerRunning) {
+                currentFragment.showNavigationAlert(menuItem.itemId)
+                false // Prevent immediate navigation
             }
-
-            when (menuItem.itemId) {
-                R.id.home -> {
-                    val firstFragment = FirstFragment()
-                    supportFragmentManager.beginTransaction()
-                        .replace(R.id.flFragment, firstFragment)
-                        .commit()
-                    if (!isPlaying) {
-                        mediaPlayer.start()
-                        isPlaying = true
+            else{
+                when (menuItem.itemId) {
+                    R.id.home -> {
+                        val firstFragment = FirstFragment()
+                        supportFragmentManager.beginTransaction()
+                            .replace(R.id.flFragment, firstFragment)
+                            .commit()
+                        if (!isPlaying) {
+                            mediaPlayer.start()
+                            isPlaying = true
+                        }
+                        true
                     }
-                    true
+                    R.id.task -> {
+                        val secondFragment = SecondFragment()
+                        supportFragmentManager.beginTransaction()
+                            .replace(R.id.flFragment, secondFragment)
+                            .commit()
+                        stopMusic()
+                        true
+                    }
+                    R.id.activity -> {
+                        val thirdFragment = ThirdFragment()
+                        supportFragmentManager.beginTransaction()
+                            .replace(R.id.flFragment, thirdFragment)
+                            .commit()
+                        stopMusic()
+                        true
+                    }
+                    R.id.profile -> {
+                        val fourthFragment = FourthFragment()
+                        supportFragmentManager.beginTransaction()
+                            .replace(R.id.flFragment, fourthFragment)
+                            .commit()
+                        stopMusic()
+                        true
+                    }
+                    else -> false
                 }
-                R.id.task -> {
-                    val secondFragment = SecondFragment()
-                    supportFragmentManager.beginTransaction()
-                        .replace(R.id.flFragment, secondFragment)
-                        .commit()
-                    stopMusic()
-                    true
+            }
+        }
+    }
+
+    fun navigateTo(menuItemId: Int) {
+        val fragment = when (menuItemId) {
+            R.id.task -> SecondFragment()
+            R.id.activity -> ThirdFragment()
+            R.id.profile -> FourthFragment()
+            else -> null
+        }
+
+        fragment?.let {
+            // Replace the fragment
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.flFragment, it)
+                .commit()
+
+            val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
+            bottomNavigationView.setOnNavigationItemSelectedListener(null)
+            bottomNavigationView.selectedItemId = menuItemId
+            bottomNavigationView.setOnNavigationItemSelectedListener { menuItem ->
+                val currentFragment = supportFragmentManager.findFragmentById(R.id.flFragment)
+                if (currentFragment is StudyFragment && currentFragment.isTimerRunning) {
+                    currentFragment.showNavigationAlert(menuItem.itemId)
+                    false // Prevent immediate navigation
                 }
-                R.id.activity -> {
-                    val thirdFragment = ThirdFragment()
-                    supportFragmentManager.beginTransaction()
-                        .replace(R.id.flFragment, thirdFragment)
-                        .commit()
-                    stopMusic()
-                    true
+                else{
+                    when (menuItem.itemId) {
+                        R.id.home -> {
+                            val firstFragment = FirstFragment()
+                            supportFragmentManager.beginTransaction()
+                                .replace(R.id.flFragment, firstFragment)
+                                .commit()
+                            if (!isPlaying) {
+                                mediaPlayer.start()
+                                isPlaying = true
+                            }
+                            true
+                        }
+                        R.id.task -> {
+                            val secondFragment = SecondFragment()
+                            supportFragmentManager.beginTransaction()
+                                .replace(R.id.flFragment, secondFragment)
+                                .commit()
+                            stopMusic()
+                            true
+                        }
+                        R.id.activity -> {
+                            val thirdFragment = ThirdFragment()
+                            supportFragmentManager.beginTransaction()
+                                .replace(R.id.flFragment, thirdFragment)
+                                .commit()
+                            stopMusic()
+                            true
+                        }
+                        R.id.profile -> {
+                            val fourthFragment = FourthFragment()
+                            supportFragmentManager.beginTransaction()
+                                .replace(R.id.flFragment, fourthFragment)
+                                .commit()
+                            stopMusic()
+                            true
+                        }
+                        else -> false
+                    }
                 }
-                R.id.profile -> {
-                    val fourthFragment = FourthFragment()
-                    supportFragmentManager.beginTransaction()
-                        .replace(R.id.flFragment, fourthFragment)
-                        .commit()
-                    stopMusic()
-                    true
-                }
-                else -> false
             }
         }
     }
@@ -104,11 +171,6 @@ class MainActivity : AppCompatActivity() {
             volumeButton.setImageResource(R.drawable.music)
         }
         isPlaying = !isPlaying
-    }
-
-    // Timer logic should call this method to set the timer state (this would typically come from your StudyFragment)
-    fun setTimerRunningState(isRunning: Boolean) {
-        isTimerRunning = isRunning
     }
 
     override fun onDestroy() {
