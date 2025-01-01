@@ -3,6 +3,7 @@ package com.example.cozyfocus
 import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -35,6 +36,8 @@ class FirstFragment : Fragment() {
 
     private lateinit var tasksRecyclerView: RecyclerView
     private lateinit var taskAdapter: TaskAdapter
+
+    private var backgroundMediaPlayer: MediaPlayer? = null
 
     private val db = FirebaseFirestore.getInstance()
 
@@ -72,6 +75,7 @@ class FirstFragment : Fragment() {
                 onStartTask = { task -> startTask(task) }
             )
             tasksRecyclerView.adapter = taskAdapter
+
         }
 
         if (savedTask != null) {
@@ -95,6 +99,12 @@ class FirstFragment : Fragment() {
         }
 
         return view
+    }
+
+    fun stopMusic() {
+        backgroundMediaPlayer?.stop()
+        backgroundMediaPlayer?.release()
+        backgroundMediaPlayer = null
     }
 
     private fun showEditTaskDialog(task: Task) {

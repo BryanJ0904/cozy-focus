@@ -14,6 +14,16 @@
         android:scaleType="centerCrop"
         tools:ignore="ContentDescription" />
 
+    <!-- Lock Icon ImageView (Initially hidden) -->
+    <ImageView
+        android:id="@+id/lockIcon"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/lock"
+        android:layout_centerInParent="true"
+        android:visibility="gone"
+        tools:ignore="MissingConstraints" /> <!-- Hidden initially -->
+
     <!-- Timer Background Section -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/timerBackground"
@@ -34,7 +44,6 @@
         android:id="@+id/tabLayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -45,7 +54,7 @@
         android:id="@+id/tvTimer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="00:05"
+        android:text="20:00"
         android:textColor="#FFFFFF"
         android:textSize="64sp"
         android:textStyle="bold"
@@ -99,7 +108,6 @@
         android:id="@+id/bg_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
         android:text="Rainy Day"
         android:textColor="#FFFFFF"
         android:textSize="18sp"
@@ -108,19 +116,49 @@
         app:layout_constraintTop_toTopOf="@id/arrow_button"
         app:layout_constraintVertical_bias="0.666" />
 
-    <!-- Lock Icon -->
-    <ImageView
-        android:id="@+id/lockIcon"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:layout_margin="16dp"
-        android:src="@drawable/lock"
-        android:contentDescription="Lock Icon"
-        android:visibility="gone"
-        android:scaleType="centerInside"
+    <!-- Progress Indicators -->
+    <LinearLayout
+        android:id="@+id/progressIndicators"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/btnStart"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Progress Dot 1 -->
+        <ImageView
+            android:id="@+id/progressDot1"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_margin="4dp"
+            android:background="@drawable/progress_dot_inactive" />
+
+        <!-- Progress Dot 2 -->
+        <ImageView
+            android:id="@+id/progressDot2"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_margin="4dp"
+            android:background="@drawable/progress_dot_inactive" />
+
+        <!-- Progress Dot 3 -->
+        <ImageView
+            android:id="@+id/progressDot3"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_margin="4dp"
+            android:background="@drawable/progress_dot_inactive" />
+
+        <!-- Progress Dot 4 -->
+        <ImageView
+            android:id="@+id/progressDot4"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_margin="4dp"
+            android:background="@drawable/progress_dot_inactive" />
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

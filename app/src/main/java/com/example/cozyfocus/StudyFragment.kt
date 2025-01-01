@@ -1,6 +1,5 @@
 package com.example.cozyfocus
 
-import com.google.android.material.tabs.TabLayout
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -13,10 +12,9 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.example.cozyfocus.R
-import com.example.cozyfocus.model.Progress
+import com.google.android.material.tabs.TabLayout
+import androidx.appcompat.app.AlertDialog
+
 
 class StudyFragment : Fragment() {
 
@@ -26,64 +24,55 @@ class StudyFragment : Fragment() {
     private lateinit var btnReset: ImageButton
     private lateinit var backgroundImageView: ImageView
     private lateinit var arrowButton: ImageButton
-    private lateinit var lockIcon: ImageView
     private lateinit var bgNameTextView: TextView
     private var timer: CountDownTimer? = null
-    private var mediaPlayer: MediaPlayer? = null
-    private var initialTimerDuration = 5 * 1000L
+    private var backgroundMediaPlayer: MediaPlayer? = null
+    private var countdownMediaPlayer: MediaPlayer? = null
+    private var initialTimerDuration = 20 * 60 * 1000L
     private var currentTimerDuration = initialTimerDuration
     private var currentTabIndex = 0
     private var currentBackgroundIndex = 0
-    private var currentLevel = 1 // Level saat ini
+    private lateinit var progressDots: List<ImageView>
+    private var completedSteps = 0
+    private var wasLastFocus = false
 
-    // Daftar latar belakang dan musik terkait
     private val backgrounds = listOf(
         Pair("Rain", Pair(R.drawable.bg, R.raw.rain)),
-        Pair("Sky", Pair(R.drawable.sky, R.raw.sky)),
+        Pair("Forest", Pair(R.drawable.forest, R.raw.forest)),
         Pair("Sea", Pair(R.drawable.sea, R.raw.sea)),
-        Pair("Cafe", Pair(R.drawable.cafe, R.raw.cafe))
+        Pair("Cafe", Pair(R.drawable.cafe, R.raw.cafe)),
+        Pair("Sky", Pair(R.drawable.sky, R.raw.sky))
     )
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         return inflater.inflate(R.layout.fragment_study, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Initialize views
-        backgroundImageView = view.findViewById(R.id.backgroundImageView)
-        lockIcon = view.findViewById(R.id.lockIcon)
-        bgNameTextView = view.findViewById(R.id.bg_name)
-        arrowButton = view.findViewById(R.id.arrow_button)
         tabLayout = view.findViewById(R.id.tabLayout)
         tvTimer = view.findViewById(R.id.tvTimer)
         btnStart = view.findViewById(R.id.btnStart)
         btnReset = view.findViewById(R.id.btnReset)
+        backgroundImageView = view.findViewById(R.id.backgroundImageView)
+        arrowButton = view.findViewById(R.id.arrow_button)
+        bgNameTextView = view.findViewById(R.id.bg_name)
 
-        // Fetch user level from Firestore (pastikan levelnya tersimpan)
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        fetchUserLevel(userId)
-
-        // Button untuk mengganti background
         arrowButton.setOnClickListener {
             currentBackgroundIndex = (currentBackgroundIndex + 1) % backgrounds.size
             updateBackground()
         }
 
-        // Update background dan musik saat awal
-        updateBackground()
-
-        // Tab selected listener
         tabLayout.addTab(tabLayout.newTab().setText("Focus"))
         tabLayout.addTab(tabLayout.newTab().setText("Break"))
         tabLayout.addTab(tabLayout.newTab().setText("Rest"))
 
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
-                currentTabIndex = tab?.position ?: 0
-                updateTimerDuration(currentTabIndex)
                 stopTimer()
                 resetTimer()
                 updateTimerDuration(tab?.position ?: 0)
@@ -105,69 +94,75 @@ class StudyFragment : Fragment() {
             resetTimer()
         }
 
+        updateBackground()
         updateTimerDuration(0)
+
+        progressDots = listOf(
+            view.findViewById(R.id.progressDot1),
+            view.findViewById(R.id.progressDot2),
+            view.findViewById(R.id.progressDot3),
+            view.findViewById(R.id.progressDot4)
+        )
+        updateProgressDots(completedSteps)
     }
 
-    // Fetch user level from Firestore
-    private fun fetchUserLevel(userId: String) {
-        val db = FirebaseFirestore.getInstance()
-        db.collection("progress")
-            .document(userId)
-            .get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    val progress = document.toObject(Progress::class.java)
-                    progress?.let {
-                        currentLevel = it.level
-                        updateBackground() // Memperbarui background berdasarkan level
-                    }
-                }
-            }
-            .addOnFailureListener { e ->
-                Log.e("StudyFragment", "Error fetching user level: ${e.message}", e)
-            }
-    }
-
-    // Update background dan musik saat user naik level
     private fun updateBackground() {
-        // Dapatkan latar belakang dan musik sesuai dengan index background
-        val (name, pair) = backgrounds[currentBackgroundIndex]
-        val (bgResId, songResId) = pair
-
-        // Set background image
+        val (name, res) = backgrounds[currentBackgroundIndex]
+        val (bgResId, songResId) = res
         backgroundImageView.setImageResource(bgResId)
-        playMusic(songResId)
-
-        // Set nama latar belakang
+        playBackgroundMusic(songResId)
         bgNameTextView.text = name
-
-        // Menyembunyikan atau menampilkan ikon kunci berdasarkan level
-        if (currentBackgroundIndex >= currentLevel) {
-            lockIcon.visibility = View.VISIBLE  // Latar belakang terkunci
-        } else {
-            lockIcon.visibility = View.GONE  // Latar belakang sudah dibuka
-        }
     }
 
-    private fun playMusic(songResId: Int) {
-        mediaPlayer?.stop()
-        mediaPlayer?.release()
-        mediaPlayer = MediaPlayer.create(context, songResId)
-        mediaPlayer?.start()
+    private fun playBackgroundMusic(songResId: Int) {
+        backgroundMediaPlayer?.stop()
+        backgroundMediaPlayer?.release()
+        backgroundMediaPlayer = MediaPlayer.create(context, songResId)
+        backgroundMediaPlayer?.isLooping = true
+        backgroundMediaPlayer?.start()
+    }
+
+    private fun stopBackgroundMusic() {
+        backgroundMediaPlayer?.stop()
+        backgroundMediaPlayer?.release()
+        backgroundMediaPlayer = null
+    }
+
+    private fun playCountdownMusic() {
+        countdownMediaPlayer?.stop()
+        countdownMediaPlayer?.release()
+        countdownMediaPlayer = MediaPlayer.create(context, R.raw.countdown)
+        countdownMediaPlayer?.setOnCompletionListener {
+            it.release()
+            countdownMediaPlayer = null
+        }
+        countdownMediaPlayer?.start()
+    }
+
+    private fun updateTimerDuration(tabIndex: Int) {
+        currentTabIndex = tabIndex
+        currentTimerDuration = when (tabIndex) {
+            0 -> 20 * 60 * 1000L  // Focus: 20 minutes
+            1 -> 5 * 60 * 1000L   // Break: 5 minutes
+            2 -> 15 * 60 * 1000L  // Rest: 15 minutes
+            else -> 5 * 1000L     // Default duration (fallback)
+        }
     }
 
     private fun startTimer(duration: Long) {
         timer?.cancel()
         btnStart.text = "Stop"
-
         timer = object : CountDownTimer(duration, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 currentTimerDuration = millisUntilFinished
                 updateTimerText(millisUntilFinished)
+
+                if (millisUntilFinished in 3000..3999) {
+                    playCountdownMusic()
+                }
             }
 
             override fun onFinish() {
-                resetTimer()
                 btnStart.text = "Start"
                 updateTimerText(0)
                 moveToNextTab()
@@ -183,8 +178,7 @@ class StudyFragment : Fragment() {
 
     private fun resetTimer() {
         stopTimer()
-        tvTimer.text = "00:05"  // Reset timer display ke default
-        currentTimerDuration = 5 * 1000L
+        currentTimerDuration = initialTimerDuration
         updateTimerText(currentTimerDuration)
     }
 
@@ -194,37 +188,59 @@ class StudyFragment : Fragment() {
         tvTimer.text = String.format("%02d:%02d", minutes, seconds)
     }
 
-    private fun updateTimerDuration(tabIndex: Int) {
-        // Update the timer duration based on the selected tab index (Focus, Break, etc.)
-        when (tabIndex) {
-            0 -> { /* Set duration for Focus tab */ }
-            1 -> { /* Set duration for Break tab */ }
-            2 -> { /* Set duration for Rest tab */ }
-        }
-    }
-
     private fun moveToNextTab() {
-        currentTabIndex = when (currentTabIndex) {
-            0 -> 1
-            1 -> 2
-            2 -> 0
+        val nextTabIndex = when (currentTabIndex) {
+            0 -> {  // From Focus
+                if (wasLastFocus) {
+                    completedSteps = minOf(completedSteps + 1, 4)  // Ensure we don't exceed 4 steps
+                    updateProgressDots(completedSteps)
+                    2  // Go to Rest
+                } else {
+                    completedSteps = minOf(completedSteps + 1, 4)
+                    updateProgressDots(completedSteps)
+                    1  // Go to Break
+                }
+            }
+            1 -> {  // From Break
+                completedSteps = minOf(completedSteps + 1, 4)
+                updateProgressDots(completedSteps)
+                wasLastFocus = true
+                0    // Go back to Focus
+            }
+            2 -> {  // From Rest
+                completedSteps = 0  // Reset progress when Rest is done
+                updateProgressDots(completedSteps)
+                wasLastFocus = false
+                0    // Go back to Focus
+            }
             else -> 0
         }
 
-        val selectedTab = tabLayout.getTabAt(currentTabIndex)
-        selectedTab?.select()
+        currentTabIndex = nextTabIndex
+        tabLayout.getTabAt(currentTabIndex)?.select()
 
         updateTimerDuration(currentTabIndex)
         resetTimer()
         startTimer(currentTimerDuration)
     }
 
+    private fun updateProgressDots(completedSteps: Int) {
+        Log.d("StudyFragment", "Updating progress dots: completedSteps = $completedSteps")
+        activity?.runOnUiThread {
+            progressDots.forEachIndexed { index, dot ->
+                dot.setBackgroundResource(
+                    if (index < completedSteps) R.drawable.progress_dot_active
+                    else R.drawable.progress_dot_inactive
+                )
+            }
+        }
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         timer?.cancel()
-        mediaPlayer?.stop()
-        mediaPlayer?.release()
-        mediaPlayer = null
+        stopBackgroundMusic()
+        countdownMediaPlayer?.release()
+        countdownMediaPlayer = null
     }
 }
-
