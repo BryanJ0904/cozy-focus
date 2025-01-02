@@ -17,12 +17,17 @@
     <!-- Lock Icon ImageView (Initially hidden) -->
     <ImageView
         android:id="@+id/lockIcon"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_margin="16dp"
         android:src="@drawable/lock"
-        android:layout_centerInParent="true"
+        android:contentDescription="Lock Icon"
         android:visibility="gone"
-        tools:ignore="MissingConstraints" /> <!-- Hidden initially -->
+        android:scaleType="centerInside"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" /><!-- Hidden initially -->
 
     <!-- Timer Background Section -->
     <androidx.constraintlayout.widget.ConstraintLayout

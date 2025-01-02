@@ -22,6 +22,7 @@ import com.example.cozyfocus.enums.TaskStatus
 import com.example.cozyfocus.enums.TaskStatus.NOT_STARTED
 import com.example.cozyfocus.model.Progress
 import com.example.cozyfocus.model.Task
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -340,6 +341,8 @@ class SecondFragment : Fragment(R.layout.fragment_second) {
             .replace(R.id.flFragment, firstFragment)
             .addToBackStack(null)
             .commit()
+
+        (activity as? MainActivity)?.navigateTo(R.id.home)
     }
 
     private fun updateUserProgress(progress: Progress): Progress {

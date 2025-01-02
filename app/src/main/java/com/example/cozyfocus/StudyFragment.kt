@@ -14,7 +14,10 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.google.android.material.tabs.TabLayout
 import androidx.appcompat.app.AlertDialog
+import com.example.cozyfocus.model.Progress
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 
 class StudyFragment : Fragment() {
@@ -25,6 +28,7 @@ class StudyFragment : Fragment() {
     private lateinit var btnReset: ImageButton
     private lateinit var backgroundImageView: ImageView
     private lateinit var arrowButton: ImageButton
+    private lateinit var lockIcon: ImageView
     private lateinit var bgNameTextView: TextView
     private var timer: CountDownTimer? = null
     private var backgroundMediaPlayer: MediaPlayer? = null
@@ -33,6 +37,7 @@ class StudyFragment : Fragment() {
     private var currentTimerDuration = initialTimerDuration
     private var currentTabIndex = 0
     private var currentBackgroundIndex = 0
+    private var currentLevel = 1
     private lateinit var progressDots: List<ImageView>
     private var completedSteps = 0
     private var wasLastFocus = false
@@ -61,14 +66,23 @@ class StudyFragment : Fragment() {
         btnStart = view.findViewById(R.id.btnStart)
         btnReset = view.findViewById(R.id.btnReset)
         backgroundImageView = view.findViewById(R.id.backgroundImageView)
+        lockIcon = view.findViewById(R.id.lockIcon)
+        bgNameTextView = view.findViewById(R.id.bg_name)
         arrowButton = view.findViewById(R.id.arrow_button)
         bgNameTextView = view.findViewById(R.id.bg_name)
         isTimerRunning = false
+
+        // Fetch user level from Firestore (pastikan levelnya tersimpan)
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        fetchUserLevel(userId)
 
         arrowButton.setOnClickListener {
             currentBackgroundIndex = (currentBackgroundIndex + 1) % backgrounds.size
             updateBackground()
         }
+
+        // Update background dan musik saat awal
+        updateBackground()
 
         tabLayout.addTab(tabLayout.newTab().setText("Focus"))
         tabLayout.addTab(tabLayout.newTab().setText("Break"))
@@ -109,12 +123,45 @@ class StudyFragment : Fragment() {
         updateProgressDots(completedSteps)
     }
 
+    // Fetch user level from Firestore
+    private fun fetchUserLevel(userId: String) {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("progress")
+            .document(userId)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val progress = document.toObject(Progress::class.java)
+                    progress?.let {
+                        currentLevel = it.level
+                        updateBackground() // Memperbarui background berdasarkan level
+                    }
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("StudyFragment", "Error fetching user level: ${e.message}", e)
+            }
+    }
+
+    // Update background dan musik saat user naik level
     private fun updateBackground() {
-        val (name, res) = backgrounds[currentBackgroundIndex]
-        val (bgResId, songResId) = res
+        // Dapatkan latar belakang dan musik sesuai dengan index background
+        val (name, pair) = backgrounds[currentBackgroundIndex]
+        val (bgResId, songResId) = pair
+
+        // Set background image
         backgroundImageView.setImageResource(bgResId)
         playBackgroundMusic(songResId)
+
+        // Set nama latar belakang
         bgNameTextView.text = name
+
+        // Menyembunyikan atau menampilkan ikon kunci berdasarkan level
+        if (currentBackgroundIndex >= currentLevel) {
+            lockIcon.visibility = View.VISIBLE  // Latar belakang terkunci
+        } else {
+            lockIcon.visibility = View.GONE  // Latar belakang sudah dibuka
+        }
     }
 
     private fun playBackgroundMusic(songResId: Int) {
